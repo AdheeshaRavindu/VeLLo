@@ -60,7 +60,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   }
 
   return (
-    <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-2 text-emerald-950 sm:px-6 lg:py-4">
+    <main className="relative flex min-h-[100dvh] w-full justify-center overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-2 text-emerald-950 sm:px-6 lg:py-2">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_38%,rgba(16,185,129,0.18),transparent_45%),radial-gradient(circle_at_72%_42%,rgba(132,204,22,0.16),transparent_38%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(236,253,245,0.85),transparent_60%)]" />
 
@@ -71,7 +71,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
         </span>
 
         <h1
-          className={`mt-3 max-w-4xl text-3xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-4 sm:text-4xl lg:text-6xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
+          className={`mt-3 max-w-4xl text-3xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-4 sm:text-4xl lg:text-5xl lg:leading-tight ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
         >
           Let&apos;s give your{" "}
           <span className="bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-clip-text text-transparent">
@@ -80,21 +80,21 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
         </h1>
 
         <p
-          className={`mt-2 text-sm font-semibold tracking-wide text-emerald-800/85 sm:mt-3 sm:text-base lg:text-xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:120ms]`}
+          className={`mt-2 text-sm font-semibold tracking-wide text-emerald-800/85 sm:mt-3 sm:text-base lg:text-lg ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:120ms]`}
         >
           Signs into real-time voice translation.
         </p>
 
         <p
-          className={`mx-auto mt-2 max-w-[330px] px-1 text-xs leading-relaxed text-emerald-800/75 sm:mt-3 sm:max-w-2xl sm:px-0 sm:text-sm ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:220ms]`}
+          className={`mx-auto mt-2 max-w-[330px] px-1 text-xs leading-relaxed text-emerald-800/75 sm:mt-3 sm:max-w-2xl sm:px-0 sm:text-sm lg:mt-2 lg:max-w-xl lg:leading-relaxed ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:220ms]`}
         >
           To translate your signs into spoken words, the system needs to see your
           movements. We don&apos;t record or store your video - everything processes
           live on your screen.
         </p>
 
-        <div className="mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-4">
-          <div className="relative h-[240px] overflow-hidden rounded-[24px] border border-emerald-300/50 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[320px] sm:rounded-[28px] lg:h-[380px]">
+        <div className="mx-auto mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-4 lg:mt-3">
+          <div className="relative h-[240px] overflow-hidden rounded-[24px] border border-emerald-300/50 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[320px] sm:rounded-[28px] lg:h-[330px]">
             <img
               src="/models/woman-sign.png"
               alt="Woman demonstrating a sign language hand gesture"
@@ -134,14 +134,14 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
           </div>
         </div>
 
-        <div className="mt-3 w-full max-w-3xl sm:mt-4">
+        <div className="mx-auto mt-3 w-full max-w-3xl sm:mt-4 lg:mt-2">
           <button
             type="button"
             disabled={permissionState === "requesting"}
             onClick={requestPermission}
             className="group w-full rounded-full bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-[length:200%_100%] [background-position:0%_50%] p-[1.5px] shadow-[0_0_36px_rgba(16,185,129,0.32)] transition-[transform,box-shadow,background-position] duration-300 ease-out active:scale-[0.995] hover:scale-[1.01] hover:[background-position:100%_50%] hover:shadow-[0_0_54px_rgba(16,185,129,0.45)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
-            <span className="flex w-full items-center justify-between gap-2 rounded-full border border-emerald-200/70 bg-white/65 px-4 py-3 text-left backdrop-blur-xl sm:gap-3 sm:px-7 sm:py-3.5">
+            <span className="flex w-full items-center justify-between gap-2 rounded-full border border-emerald-200/70 bg-white/65 px-4 py-3 text-left backdrop-blur-xl sm:gap-3 sm:px-7 sm:py-3.5 lg:py-2.5">
               <span className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500/10 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.2)] sm:h-10 sm:w-10">
                   {permissionState === "requesting" ? (
@@ -154,12 +154,12 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
                   <Mic className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-emerald-900 sm:text-base lg:text-lg">
+                  <span className="block text-sm font-semibold text-emerald-900 sm:text-base lg:text-base">
                     {permissionState === "requesting"
                       ? "Waiting for permission..."
                       : "Enable Camera & Mic"}
                   </span>
-                  <span className="block text-[11px] text-emerald-800/80 sm:text-sm">
+                  <span className="block text-[11px] text-emerald-800/80 sm:text-sm lg:text-xs">
                     Click to get started
                   </span>
                 </span>
@@ -168,7 +168,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             </span>
           </button>
 
-          <p className="mt-2 inline-flex max-w-[320px] items-start gap-1.5 text-center text-[11px] text-emerald-800/75 sm:max-w-none sm:items-center sm:gap-2 sm:text-xs">
+          <p className="mt-2 inline-flex max-w-[320px] items-start gap-1.5 text-center text-[11px] text-emerald-800/75 sm:max-w-none sm:items-center sm:gap-2 sm:text-xs lg:mt-1">
             <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700 sm:mt-0" aria-hidden="true" />
             A browser popup will appear next. Please click &quot;Allow&quot; to start.
           </p>
