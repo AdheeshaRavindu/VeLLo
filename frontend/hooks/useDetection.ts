@@ -5,8 +5,8 @@ import type { DetectionResponse, Intent } from "@/types";
 import type { TrackingSnapshot } from "@/hooks/useCamera";
 
 const POLL_INTERVAL_MS = 250;
-const LIVE_STABILITY_FRAMES = 2;
-const HANDS_FREE_RESET_MS = 500;
+const MAX_FRAME_WIDTH = 640;
+const JPEG_QUALITY = 0.65;
 
 interface UseDetectionProps {
   getTrackingSnapshot: () => TrackingSnapshot;
@@ -98,7 +98,7 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
           demo_intent: intent,
         });
 
-        // Single-sign mode: surface detections immediately to avoid hiding valid "yes" frames.
+        // Require two consecutive same intents before showing phrase in live mode.
         if (!intent) {
           if (result.intent && result.intent === stableIntentRef.current) {
             stableCountRef.current += 1;
@@ -110,7 +110,7 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
             stableCountRef.current = 0;
           }
 
-          if (result.intent && stableCountRef.current < LIVE_STABILITY_FRAMES) {
+          if (result.intent && stableCountRef.current < 2) {
             setDetection({ ...result, intent: null, phrase: null });
           } else {
             setDetection(result);
