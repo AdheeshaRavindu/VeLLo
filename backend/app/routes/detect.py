@@ -10,7 +10,6 @@ from app.utils.constants import INTENT_THRESHOLDS, SUPPORTED_INTENTS
 
 router = APIRouter(prefix="/api", tags=["detect"])
 INTENT_ALIASES: dict[str, str] = {
-    "help": "i_need_help",
     "emergency": "i_need_help",
 }
 
