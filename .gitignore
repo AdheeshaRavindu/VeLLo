@@ -8,6 +8,11 @@ frontend/.env.local
 backend/.venv/
 backend/__pycache__/
 backend/.env
+backend/kaggle/
+backend/kaggle-public/
+backend/app/data/kaggle/
+backend/app/data/kaggle-public/
+
 *.pyc
 
 # misc
