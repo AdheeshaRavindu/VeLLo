@@ -7,10 +7,10 @@
 ```json
 {
   "image_base64": "data:image/jpeg;base64,...",
-  "demo_intent": "help",
+  "demo_intent": "yes",
   "include_debug": false,
   "capture_sample": false,
-  "capture_label": "help"
+  "capture_label": "yes"
 }
 ```
 
@@ -18,9 +18,9 @@
 ```json
 {
   "hand_detected": true,
-  "confidence": 0.83,
-  "intent": "help",
-  "phrase": "Please help me.",
+  "confidence": 0.78,
+  "intent": "yes",
+  "phrase": "Yes.",
   "source": "vision",
   "handedness": "Right",
   "handedness_score": 0.97,

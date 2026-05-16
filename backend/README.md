@@ -26,6 +26,9 @@ Backend will be available at:
 - Optional environment variable:
   - `CLASSIFIER_MODE=rule` (default)
   - `CLASSIFIER_MODE=model` (uses model path, then falls back to rules)
+- Current single-sign setup expects ASL-style `yes`:
+  - Closed fist handshape
+  - Short up/down nodding motion over recent frames
 
 ## Training Data Capture
 `POST /api/detect` accepts optional fields:
