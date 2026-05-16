@@ -6,6 +6,7 @@ import {
   AudioLines,
   Camera,
   CheckCircle2,
+  Globe,
   Hand,
   Lock,
   Mic,
@@ -74,17 +75,22 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
       <div className="pointer-events-none absolute left-8 top-1/3 hidden h-24 w-24 rounded-full border border-white/10 bg-zinc-900/40 backdrop-blur lg:block" />
       <div className="pointer-events-none absolute right-8 top-1/2 hidden h-20 w-20 rounded-full border border-white/10 bg-zinc-900/40 backdrop-blur lg:block" />
 
-      <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col">
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-200 shadow-[0_0_24px_rgba(59,130,246,0.25)] backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.9)]" />
-            SignVoice
+      <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col px-1 sm:px-2">
+        <div className="flex items-center justify-between pt-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/55 px-3 py-1.5 shadow-[0_0_28px_rgba(99,102,241,0.28)] backdrop-blur-xl">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/90 via-indigo-500/90 to-violet-500/90 text-white shadow-[0_0_16px_rgba(99,102,241,0.65)]">
+              <Hand className="h-3.5 w-3.5" aria-hidden="true" />
+            </span>
+            <span className="bg-gradient-to-r from-white via-zinc-100 to-violet-300 bg-clip-text text-sm font-bold tracking-tight text-transparent">
+              SignVoice
+            </span>
           </div>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-1.5 text-xs text-zinc-200 transition hover:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+            className="inline-flex items-center gap-2 rounded-full border border-indigo-400/25 bg-zinc-900/55 px-3.5 py-1.5 text-xs text-zinc-200 shadow-[0_0_24px_rgba(99,102,241,0.2)] backdrop-blur-xl transition hover:border-indigo-300/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
             aria-label="Language selector"
           >
+            <Globe className="h-3.5 w-3.5 text-indigo-200" aria-hidden="true" />
             English
             <ChevronDown className="h-4 w-4" aria-hidden="true" />
           </button>
