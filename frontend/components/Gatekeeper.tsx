@@ -98,15 +98,12 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             <img
               src="/models/woman-sign.png"
               alt="Woman demonstrating a sign language hand gesture"
-              className="h-full w-full object-contain object-center opacity-95"
+              className="h-full w-full scale-[1.42] object-contain object-center opacity-95 sm:scale-[1.34] lg:scale-[1.24]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/30 via-emerald-900/5 to-transparent" />
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(16,185,129,0.18),transparent_45%)]" />
 
-            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2.5 py-1 text-[9px] font-medium tracking-[0.08em] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.25)] sm:left-4 sm:top-4 sm:gap-1.5 sm:px-3 sm:text-[10px]">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-600 shadow-[0_0_8px_rgba(5,150,105,0.7)]" />
-              LIVE
-            </span>
+            
 
             <div className="absolute left-2 top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/72 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_14px_rgba(16,185,129,0.16)] backdrop-blur-xl sm:left-4 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
               <span className="flex items-center gap-1 sm:gap-1.5">
