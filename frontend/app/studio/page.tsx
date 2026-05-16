@@ -14,12 +14,31 @@ import { detectSign, synthesizeVoice } from "@/services/api";
 import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
 import type { Intent } from "@/types";
 
+const DETECTION_INTERVAL_MS = 320;
+const DUPLICATE_GESTURE_WINDOW_MS = 1200;
+const PHRASE_INACTIVITY_TIMEOUT_MS = 2600;
+const PHRASE_SEPARATOR = ", ";
+
+type BufferedGesture = {
+  intent: Intent;
+  phrase: string;
+  timestamp: number;
+  confidence: number;
+};
+
 export default function StudioPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const lastSpokenTextRef = useRef<string>("");
-  const lastSpokenAtRef = useRef<number>(0);
+  const gestureBufferRef = useRef<BufferedGesture[]>([]);
+  const inactivityTimerRef = useRef<number | null>(null);
+  const pendingFinalizeRef = useRef(false);
+  const playbackBusyRef = useRef(false);
+  const lastAcceptedGestureRef = useRef<{ intent: Intent | null; timestamp: number }>({
+    intent: null,
+    timestamp: 0,
+  });
+  const objectUrlRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
 
   const [cameraStatus, setCameraStatus] = useState<"loading" | "ready" | "denied">(
@@ -37,6 +56,9 @@ export default function StudioPage() {
   const [recognizedIntent, setRecognizedIntent] = useState<Intent | null>(null);
   const [recognizedGloss, setRecognizedGloss] = useState("[WAITING FOR HAND]");
   const [recognizedTranslation, setRecognizedTranslation] = useState("Show a hand gesture to begin");
+  const [gestureBuffer, setGestureBuffer] = useState<BufferedGesture[]>([]);
+  const [phrasePreview, setPhrasePreview] = useState("");
+  const [lastPlayedPhrase, setLastPlayedPhrase] = useState<string | null>(null);
   const [detectionError, setDetectionError] = useState<string | null>(null);
   const [translationFeed, setTranslationFeed] = useState<
     Array<{ id: number; gloss: string; translation: string; timestamp: number; confidence: number }>
@@ -48,11 +70,32 @@ export default function StudioPage() {
   const subtitleFrames = [{ gloss: recognizedGloss, translation: recognizedTranslation }];
   const subtitleIndex = 0;
 
+  useEffect(() => {
+    gestureBufferRef.current = gestureBuffer;
+  }, [gestureBuffer]);
+
   const intentToGloss = useCallback((intent: Intent | null) => {
     if (intent === "yes") return "[YES]";
     if (intent === "no") return "[NO]";
     if (intent === "i_need_help") return "[I] [NEED] [HELP]";
     return "[UNRECOGNIZED]";
+  }, []);
+
+  const buildCombinedPhrase = useCallback((entries: BufferedGesture[]) => {
+    const sanitized = entries
+      .map((entry) => entry.phrase.trim().replace(/[.,!?;:\s]+$/g, ""))
+      .filter((text) => text.length > 0);
+    if (sanitized.length === 0) {
+      return "";
+    }
+    return `${sanitized.join(PHRASE_SEPARATOR)}.`;
+  }, []);
+
+  const clearInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
   }, []);
 
   const updateRecognition = useCallback(
@@ -85,35 +128,93 @@ export default function StudioPage() {
   );
 
   const speakPhrase = useCallback(async (text: string) => {
-    const now = Date.now();
-    if (lastSpokenTextRef.current === text && now - lastSpokenAtRef.current < 2500) {
+    if (!text) {
       return;
     }
-    lastSpokenTextRef.current = text;
-    lastSpokenAtRef.current = now;
-
+    playbackBusyRef.current = true;
     try {
       setAudioState("generating");
       const voiceResult = await synthesizeVoice({ text });
       if (voiceResult.audio_base64) {
         const src = base64ToObjectUrl(voiceResult.audio_base64, voiceResult.content_type);
+        if (objectUrlRef.current) {
+          URL.revokeObjectURL(objectUrlRef.current);
+          objectUrlRef.current = null;
+        }
+        objectUrlRef.current = src;
         if (audioRef.current) {
           audioRef.current.src = src;
           await audioRef.current.play();
           setAudioState("playing");
           setIsSpeaking(true);
+          setLastPlayedPhrase(text);
           return;
         }
       }
       speakFallback(text);
       setAudioState("playing");
       setIsSpeaking(true);
+      setLastPlayedPhrase(text);
+      playbackBusyRef.current = false;
     } catch {
       speakFallback(text);
       setAudioState("error");
       setIsSpeaking(false);
+      playbackBusyRef.current = false;
     }
   }, []);
+
+  const finalizeBufferedPhrase = useCallback(async () => {
+    clearInactivityTimer();
+    const bufferSnapshot = gestureBufferRef.current;
+    if (bufferSnapshot.length === 0) {
+      return;
+    }
+    if (playbackBusyRef.current) {
+      pendingFinalizeRef.current = true;
+      return;
+    }
+    const combinedPhrase = buildCombinedPhrase(bufferSnapshot);
+    if (!combinedPhrase) {
+      setGestureBuffer([]);
+      setPhrasePreview("");
+      gestureBufferRef.current = [];
+      return;
+    }
+    setPhrasePreview(combinedPhrase);
+    setGestureBuffer([]);
+    gestureBufferRef.current = [];
+    pendingFinalizeRef.current = false;
+    await speakPhrase(combinedPhrase);
+  }, [buildCombinedPhrase, clearInactivityTimer, speakPhrase]);
+
+  const scheduleAutoFinalize = useCallback(() => {
+    clearInactivityTimer();
+    inactivityTimerRef.current = window.setTimeout(() => {
+      void finalizeBufferedPhrase();
+    }, PHRASE_INACTIVITY_TIMEOUT_MS);
+  }, [clearInactivityTimer, finalizeBufferedPhrase]);
+
+  const pushGestureToBuffer = useCallback(
+    (intent: Intent, phrase: string, score: number) => {
+      const now = Date.now();
+      const duplicateRapidFire =
+        lastAcceptedGestureRef.current.intent === intent &&
+        now - lastAcceptedGestureRef.current.timestamp < DUPLICATE_GESTURE_WINDOW_MS;
+      if (duplicateRapidFire) {
+        return;
+      }
+      lastAcceptedGestureRef.current = { intent, timestamp: now };
+      updateRecognition(intent, phrase, score);
+      setGestureBuffer((prev) => {
+        const next = [...prev, { intent, phrase, timestamp: now, confidence: score }];
+        setPhrasePreview(buildCombinedPhrase(next));
+        return next;
+      });
+      scheduleAutoFinalize();
+    },
+    [buildCombinedPhrase, scheduleAutoFinalize, updateRecognition],
+  );
 
   const captureFrame = useCallback((): string | null => {
     const video = videoRef.current;
@@ -193,8 +294,7 @@ export default function StudioPage() {
         setHandDetected(result.hand_detected);
         setConfidence(result.confidence ?? 0);
         if (result.intent && result.phrase) {
-          updateRecognition(result.intent, result.phrase, result.confidence);
-          void speakPhrase(result.phrase);
+          pushGestureToBuffer(result.intent, result.phrase, result.confidence);
         } else {
           setIsSpeaking(false);
           if (result.error) {
@@ -212,13 +312,13 @@ export default function StudioPage() {
         }
         inFlightRef.current = false;
       }
-    }, 320);
+    }, DETECTION_INTERVAL_MS);
 
     return () => {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [cameraStatus, captureFrame, speakPhrase, updateRecognition]);
+  }, [cameraStatus, captureFrame, pushGestureToBuffer]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -226,10 +326,25 @@ export default function StudioPage() {
     const handleEnded = () => {
       setIsSpeaking(false);
       setAudioState("idle");
+      playbackBusyRef.current = false;
+      if (pendingFinalizeRef.current) {
+        pendingFinalizeRef.current = false;
+        void finalizeBufferedPhrase();
+      }
     };
     audio.addEventListener("ended", handleEnded);
     return () => audio.removeEventListener("ended", handleEnded);
-  }, []);
+  }, [finalizeBufferedPhrase]);
+
+  useEffect(
+    () => () => {
+      clearInactivityTimer();
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    },
+    [clearInactivityTimer],
+  );
 
   const cameraHealth =
     cameraStatus === "ready"
@@ -490,6 +605,24 @@ export default function StudioPage() {
                         {recognizedIntent ? recognizedIntent.replaceAll("_", " ") : "none"}
                       </span>
                     </p>
+                    <p className="mt-1 text-[10px] text-emerald-100/65">
+                      Queue:{" "}
+                      <span className="font-semibold text-emerald-100">
+                        {gestureBuffer.length > 0
+                          ? gestureBuffer.map((item) => item.intent.replaceAll("_", " ")).join(" -> ")
+                          : "empty"}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-[10px] text-emerald-100/65">
+                      Phrase Builder:{" "}
+                      <span className="font-semibold text-emerald-100">
+                        {phrasePreview || "waiting..."}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-[10px] text-emerald-100/65">
+                      Playback:{" "}
+                      <span className="font-semibold text-emerald-100">{audioState}</span>
+                    </p>
                   </div>
                 </article>
 
@@ -636,6 +769,21 @@ export default function StudioPage() {
                     {recognizedIntent ? recognizedIntent.replaceAll("_", " ") : "none"}
                   </span>
                 </p>
+                <p className="mt-1 text-[10px] text-emerald-100/65">
+                  Queue:{" "}
+                  <span className="font-semibold text-emerald-100">
+                    {gestureBuffer.length > 0
+                      ? gestureBuffer.map((item) => item.intent.replaceAll("_", " ")).join(" -> ")
+                      : "empty"}
+                  </span>
+                </p>
+                <p className="mt-1 text-[10px] text-emerald-100/65">
+                  Phrase Builder:{" "}
+                  <span className="font-semibold text-emerald-100">{phrasePreview || "waiting..."}</span>
+                </p>
+                <p className="mt-1 text-[10px] text-emerald-100/65">
+                  Playback: <span className="font-semibold text-emerald-100">{audioState}</span>
+                </p>
               </div>
             </article>
 
@@ -673,6 +821,11 @@ export default function StudioPage() {
           </div>
         </div>
       </aside>
+      {lastPlayedPhrase ? (
+        <div className="pointer-events-none fixed bottom-4 left-4 z-30 rounded-xl border border-emerald-300/40 bg-white/85 px-3 py-2 text-xs text-emerald-900 shadow-[0_0_14px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+          Last spoken: {lastPlayedPhrase}
+        </div>
+      ) : null}
       <audio ref={audioRef} className="hidden" />
     </main>
   );
