@@ -26,6 +26,20 @@ export default function StudioPage() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const touchStartY = useRef<number | null>(null);
+  const [sessionHistory, setSessionHistory] = useState<
+    Array<{ gloss: string; translation: string; timestamp: number }>
+  >([
+    {
+      gloss: "[HELLO] [NICE] [MEET]",
+      translation: "Hello, nice to meet you.",
+      timestamp: Date.now() - 145000,
+    },
+    {
+      gloss: "[PLEASE] [REPEAT] [SLOW]",
+      translation: "Please repeat that slowly.",
+      timestamp: Date.now() - 92000,
+    },
+  ]);
 
   const subtitleFrames = [
     { gloss: "[YOU] [NAME] [WHAT]", translation: "What is your name?" },
@@ -72,7 +86,20 @@ export default function StudioPage() {
       setSubtitleVisible(false);
       setIsSpeaking(false);
       window.setTimeout(() => {
-        setSubtitleIndex((prev) => (prev + 1) % subtitleFrames.length);
+        setSubtitleIndex((prev) => {
+          const next = (prev + 1) % subtitleFrames.length;
+          setSessionHistory((history) =>
+            [
+              {
+                gloss: subtitleFrames[next].gloss,
+                translation: subtitleFrames[next].translation,
+                timestamp: Date.now(),
+              },
+              ...history,
+            ].slice(0, 5),
+          );
+          return next;
+        });
         setSubtitleVisible(true);
         setIsSpeaking(true);
       }, 220);
@@ -87,23 +114,15 @@ export default function StudioPage() {
     return () => window.clearTimeout(timer);
   }, [subtitleIndex, isSpeaking]);
 
-  const commandSections = [
-    {
-      title: "Session History",
-      icon: <History className="h-4 w-4 text-blue-300" />,
-      items: ["09:41 - Greeting sequence", "09:45 - Name question", "09:47 - Clarification request"],
-    },
-    {
-      title: "Phrase Guide",
-      icon: <BookText className="h-4 w-4 text-violet-300" />,
-      items: ["Hello, nice to meet you", "What is your name?", "Please repeat slowly"],
-    },
-    {
-      title: "System Status",
-      icon: <Activity className="h-4 w-4 text-emerald-300" />,
-      items: ["Camera: Stable", "Recognition: Active", "Voice Output: Online"],
-    },
-  ];
+  const formatRelativeTime = (timestamp: number) => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 5) return "just now";
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#050814] via-[#070b18] to-[#050711] px-4 py-4 text-zinc-100 sm:px-6 lg:px-8">
@@ -209,24 +228,52 @@ export default function StudioPage() {
 
           {panelOpen ? (
             <div className="space-y-3">
-              {commandSections.map((section) => (
-                <div
-                  key={section.title}
-                  className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3"
-                >
-                  <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
-                    {section.icon}
-                    {section.title}
-                  </div>
-                  <div className="space-y-1.5">
-                    {section.items.map((item) => (
-                      <p key={item} className="text-xs text-zinc-400">
-                        {item}
-                      </p>
-                    ))}
-                  </div>
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
+                  <History className="h-4 w-4 text-blue-300" />
+                  Session History
                 </div>
-              ))}
+                <div className="space-y-2">
+                  {sessionHistory.slice(0, 5).map((item, index) => (
+                    <article
+                      key={`${item.timestamp}-${index}`}
+                      className="rounded-xl border border-white/10 bg-zinc-900/55 p-2"
+                    >
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                        {item.gloss}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-100">{item.translation}</p>
+                      <p className="mt-1 text-[10px] text-zinc-500">
+                        {formatRelativeTime(item.timestamp)}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
+                  <BookText className="h-4 w-4 text-violet-300" />
+                  Phrase Guide
+                </div>
+                <div className="space-y-1.5 text-xs text-zinc-400">
+                  <p>Hello, nice to meet you</p>
+                  <p>What is your name?</p>
+                  <p>Please repeat slowly</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
+                  <Activity className="h-4 w-4 text-emerald-300" />
+                  System Status
+                </div>
+                <div className="space-y-1.5 text-xs text-zinc-400">
+                  <p>Camera: Stable</p>
+                  <p>Recognition: Active</p>
+                  <p>Voice Output: Online</p>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="flex h-[calc(100%-44px)] flex-col items-center justify-start gap-3 pt-3">
@@ -284,24 +331,52 @@ export default function StudioPage() {
           </button>
         </div>
         <div className="space-y-3 overflow-y-auto pb-2">
-          {commandSections.map((section) => (
-            <div
-              key={section.title}
-              className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3"
-            >
-              <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
-                {section.icon}
-                {section.title}
-              </div>
-              <div className="space-y-1.5">
-                {section.items.map((item) => (
-                  <p key={item} className="text-xs text-zinc-400">
-                    {item}
-                  </p>
-                ))}
-              </div>
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
+              <History className="h-4 w-4 text-blue-300" />
+              Session History
             </div>
-          ))}
+            <div className="space-y-2">
+              {sessionHistory.slice(0, 5).map((item, index) => (
+                <article
+                  key={`${item.timestamp}-mobile-${index}`}
+                  className="rounded-xl border border-white/10 bg-zinc-900/55 p-2"
+                >
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                    {item.gloss}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-100">{item.translation}</p>
+                  <p className="mt-1 text-[10px] text-zinc-500">
+                    {formatRelativeTime(item.timestamp)}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
+              <BookText className="h-4 w-4 text-violet-300" />
+              Phrase Guide
+            </div>
+            <div className="space-y-1.5 text-xs text-zinc-400">
+              <p>Hello, nice to meet you</p>
+              <p>What is your name?</p>
+              <p>Please repeat slowly</p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
+              <Activity className="h-4 w-4 text-emerald-300" />
+              System Status
+            </div>
+            <div className="space-y-1.5 text-xs text-zinc-400">
+              <p>Camera: Stable</p>
+              <p>Recognition: Active</p>
+              <p>Voice Output: Online</p>
+            </div>
+          </div>
         </div>
       </aside>
     </main>
