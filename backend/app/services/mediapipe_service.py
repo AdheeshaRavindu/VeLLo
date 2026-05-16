@@ -1,5 +1,7 @@
 import base64
 from dataclasses import dataclass
+from pathlib import Path
+import urllib.request
 
 import cv2
 import mediapipe as mp
@@ -17,14 +19,49 @@ class HandDetectionResult:
 
 
 class MediaPipeService:
+    _TASK_MODEL_URL = (
+        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/"
+        "hand_landmarker/float16/1/hand_landmarker.task"
+    )
+
     def __init__(self) -> None:
-        self._hands = mp.solutions.hands.Hands(
-            static_image_mode=False,
-            max_num_hands=1,
-            model_complexity=0,
-            min_detection_confidence=0.6,
-            min_tracking_confidence=0.6,
+        self._backend: str = ""
+        self._hands = None
+        self._landmarker = None
+
+        if hasattr(mp, "solutions"):
+            self._hands = mp.solutions.hands.Hands(
+                static_image_mode=True,
+                max_num_hands=2,
+                model_complexity=0,
+                min_detection_confidence=0.25,
+                min_tracking_confidence=0.25,
+            )
+            self._backend = "solutions"
+            return
+
+        self._landmarker = self._create_tasks_landmarker()
+        self._backend = "tasks"
+
+    def _ensure_task_model(self) -> str:
+        model_path = Path(__file__).resolve().parents[2] / "models" / "hand_landmarker.task"
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        if not model_path.exists():
+            urllib.request.urlretrieve(self._TASK_MODEL_URL, model_path)
+        return str(model_path)
+
+    def _create_tasks_landmarker(self):
+        from mediapipe.tasks.python import BaseOptions
+        from mediapipe.tasks.python import vision
+
+        options = vision.HandLandmarkerOptions(
+            base_options=BaseOptions(model_asset_path=self._ensure_task_model()),
+            num_hands=2,
+            min_hand_detection_confidence=0.25,
+            min_hand_presence_confidence=0.25,
+            min_tracking_confidence=0.25,
         )
+        return vision.HandLandmarker.create_from_options(options)
 
     def _decode_image(self, image_base64: str) -> np.ndarray:
         payload = image_base64
@@ -62,7 +99,7 @@ class MediaPipeService:
             )
 
         landmarks: list[list[float]] = []
-        for point in results.multi_hand_landmarks[0].landmark:
+        for point in primary_points:
             landmarks.append([float(point.x), float(point.y), float(point.z)])
 
         handedness_label: str | None = None
