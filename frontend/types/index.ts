@@ -13,7 +13,10 @@ export type Intent =
 export type CameraPermission = "idle" | "requesting" | "granted" | "denied" | "error";
 
 export interface DetectRequest {
-  image_base64: string;
+  image_base64?: string;
+  landmarks?: number[][];
+  handedness?: "Left" | "Right" | null;
+  handedness_score?: number;
   demo_intent?: Intent | null;
 }
 

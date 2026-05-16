@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { RefObject } from "react";
 
 import { detectSign } from "@/services/api";
 import type { DetectionResponse, Intent } from "@/types";
+import type { TrackingSnapshot } from "@/hooks/useCamera";
 
 const POLL_INTERVAL_MS = 250;
-const MAX_FRAME_WIDTH = 800;
-const JPEG_QUALITY = 0.75;
 const LIVE_STABILITY_FRAMES = 2;
 
 interface UseDetectionProps {
-  videoRef: RefObject<HTMLVideoElement>;
+  getTrackingSnapshot: () => TrackingSnapshot;
   enabled: boolean;
 }
 
@@ -22,38 +20,13 @@ interface UseDetectionResult {
   triggerDemoIntent: (intent: Intent) => Promise<void>;
 }
 
-export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetectionResult {
+export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps): UseDetectionResult {
   const [detection, setDetection] = useState<DetectionResponse | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stableIntentRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
   const inFlightRef = useRef(false);
-
-  const captureFrame = useCallback((): string | null => {
-    const video = videoRef.current;
-    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
-      return null;
-    }
-
-    if (!canvasRef.current) {
-      canvasRef.current = document.createElement("canvas");
-    }
-    const canvas = canvasRef.current;
-    const sourceWidth = video.videoWidth;
-    const sourceHeight = video.videoHeight;
-    const scale = sourceWidth > MAX_FRAME_WIDTH ? MAX_FRAME_WIDTH / sourceWidth : 1;
-    canvas.width = Math.max(1, Math.round(sourceWidth * scale));
-    canvas.height = Math.max(1, Math.round(sourceHeight * scale));
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return null;
-    }
-
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
-  }, [videoRef]);
 
   const runDetection = useCallback(
     async (intent: Intent | null = null) => {
@@ -61,8 +34,8 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
         return;
       }
 
-      const image = captureFrame();
-      if (!image && !intent) {
+      const snapshot = getTrackingSnapshot();
+      if (!snapshot.landmarks && !intent) {
         return;
       }
 
@@ -74,7 +47,9 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
         setIsDetecting(true);
         setError(null);
         const result = await detectSign({
-          image_base64: image ?? "",
+          landmarks: snapshot.landmarks ?? undefined,
+          handedness: snapshot.handedness,
+          handedness_score: snapshot.handednessScore,
           demo_intent: intent,
         });
 
@@ -105,7 +80,7 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
         setIsDetecting(false);
       }
     },
-    [captureFrame, enabled],
+    [enabled, getTrackingSnapshot],
   );
 
   const detectNow = useCallback(async () => {
