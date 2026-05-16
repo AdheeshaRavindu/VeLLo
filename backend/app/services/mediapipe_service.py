@@ -87,35 +87,91 @@ class MediaPipeService:
                 error="Unable to decode frame",
             )
 
-        frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-        results = self._hands.process(frame_rgb)
-        if not results.multi_hand_landmarks:
+        try:
+            frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+
+            if self._backend == "solutions" and self._hands is not None:
+                results = self._hands.process(frame_rgb)
+                if not results.multi_hand_landmarks:
+                    return HandDetectionResult(
+                        hand_detected=False,
+                        confidence=0.0,
+                        landmarks=[],
+                        handedness=None,
+                        handedness_score=0.0,
+                    )
+
+                primary_points = results.multi_hand_landmarks[0].landmark
+                landmarks: list[list[float]] = [
+                    [float(point.x), float(point.y), float(point.z)]
+                    for point in primary_points
+                ]
+
+                handedness_label: str | None = None
+                handedness_score = 0.0
+                if results.multi_handedness:
+                    classification = results.multi_handedness[0].classification[0]
+                    handedness_label = str(classification.label)
+                    handedness_score = float(classification.score)
+
+                return HandDetectionResult(
+                    hand_detected=True,
+                    confidence=max(0.7, handedness_score),
+                    landmarks=landmarks,
+                    handedness=handedness_label,
+                    handedness_score=handedness_score,
+                )
+
+            if self._landmarker is None:
+                return HandDetectionResult(
+                    hand_detected=False,
+                    confidence=0.0,
+                    landmarks=[],
+                    handedness=None,
+                    handedness_score=0.0,
+                    error="MediaPipe backend unavailable",
+                )
+
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_rgb)
+            task_results = self._landmarker.detect(mp_image)
+            if not task_results.hand_landmarks:
+                return HandDetectionResult(
+                    hand_detected=False,
+                    confidence=0.0,
+                    landmarks=[],
+                    handedness=None,
+                    handedness_score=0.0,
+                )
+
+            primary_points = task_results.hand_landmarks[0]
+            landmarks = [
+                [float(point.x), float(point.y), float(point.z)]
+                for point in primary_points
+            ]
+
+            handedness_label: str | None = None
+            handedness_score = 0.0
+            if task_results.handedness and task_results.handedness[0]:
+                category = task_results.handedness[0][0]
+                handedness_label = str(category.category_name)
+                handedness_score = float(category.score)
+
+            return HandDetectionResult(
+                hand_detected=True,
+                confidence=max(0.7, handedness_score),
+                landmarks=landmarks,
+                handedness=handedness_label,
+                handedness_score=handedness_score,
+            )
+        except Exception:
             return HandDetectionResult(
                 hand_detected=False,
                 confidence=0.0,
                 landmarks=[],
                 handedness=None,
                 handedness_score=0.0,
+                error="Hand detection failed",
             )
-
-        landmarks: list[list[float]] = []
-        for point in primary_points:
-            landmarks.append([float(point.x), float(point.y), float(point.z)])
-
-        handedness_label: str | None = None
-        handedness_score = 0.0
-        if results.multi_handedness:
-            classification = results.multi_handedness[0].classification[0]
-            handedness_label = str(classification.label)
-            handedness_score = float(classification.score)
-
-        return HandDetectionResult(
-            hand_detected=True,
-            confidence=max(0.7, handedness_score),
-            landmarks=landmarks,
-            handedness=handedness_label,
-            handedness_score=handedness_score,
-        )
 
 
 mediapipe_service = MediaPipeService()
