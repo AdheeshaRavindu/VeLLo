@@ -1,1 +1,18 @@
+{
+  "help": "open_palm",
+  "water": "thumb_up",
+  "doctor": "index_up",
+  "medicine": "index_middle_up",
+  "emergency": "index_middle_ring_up",
+  "pain": "fist",
+  "chest_pain": "thumb_index_up",
+  "breathing_problem": "open_four_no_thumb",
+  "dizzy": "middle_up",
+  "hungry": "ring_up",
+  "toilet": "pinky_up",
+  "yes": "thumb_index_pinch",
+  "no": "index_pinky_up",
+  "stop": "palm_no_thumb",
+  "thank_you": "thumb_index_middle_up"
+}
 

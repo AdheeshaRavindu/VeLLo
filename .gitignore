@@ -1,1 +1,16 @@
+# frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# backend
+backend/.venv/
+backend/__pycache__/
+backend/.env
+*.pyc
+
+# misc
+.DS_Store
+Thumbs.db
 
