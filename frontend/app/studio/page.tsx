@@ -1,26 +1,69 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Captions,
-  ChevronLeft,
-  ChevronRight,
-  Languages,
-  Sparkles,
-  Video,
-  Volume2,
-} from "lucide-react";
 import { detectSign, synthesizeVoice } from "@/services/api";
 import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
 import type { Intent } from "@/types";
 
+type IconProps = {
+  className?: string;
+  "aria-hidden"?: boolean;
+};
+
+const Captions = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"CC"}
+  </span>
+);
+
+const ChevronLeft = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"<"}
+  </span>
+);
+
+const ChevronRight = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {">"}
+  </span>
+);
+
+const Languages = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"A"}
+  </span>
+);
+
+const Sparkles = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"*"}
+  </span>
+);
+
+const Video = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"V"}
+  </span>
+);
+
+const Volume2 = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"O"}
+  </span>
+);
+
 export default function StudioPage() {
+  const NO_HAND_RESET_MS = 700;
+  const FEED_DUPLICATE_WINDOW_MS = 2000;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastSpokenTextRef = useRef<string>("");
   const lastSpokenAtRef = useRef<number>(0);
   const inFlightRef = useRef(false);
+  const noHandSinceRef = useRef<number | null>(null);
+  const lastRecognitionKeyRef = useRef<string>("");
+  const lastRecognitionAtRef = useRef<number>(0);
 
   const [cameraStatus, setCameraStatus] = useState<"loading" | "ready" | "denied">(
     "loading",
@@ -59,32 +102,56 @@ export default function StudioPage() {
 
   const updateRecognition = useCallback(
     (intent: Intent, phrase: string, score: number) => {
+      const now = Date.now();
+      const recognitionKey = `${intent}|${phrase}`;
+      const isDuplicateRecognition =
+        recognitionKey === lastRecognitionKeyRef.current &&
+        now - lastRecognitionAtRef.current < FEED_DUPLICATE_WINDOW_MS;
+
+      lastRecognitionKeyRef.current = recognitionKey;
+      lastRecognitionAtRef.current = now;
+
       const nextGloss = intentToGloss(intent);
       setRecognizedIntent(intent);
       setConfidence(score);
-      setPhrasePulse(true);
-      setSubtitleVisible(false);
-      window.setTimeout(() => {
-        setRecognizedGloss(nextGloss);
-        setRecognizedTranslation(phrase);
-        setSubtitleVisible(true);
-      }, 180);
-      window.setTimeout(() => setPhrasePulse(false), 650);
-      setTranslationFeed((prev) =>
-        [
-          {
-            id: Date.now(),
-            gloss: nextGloss,
-            translation: phrase,
-            timestamp: Date.now(),
-            confidence: score,
-          },
-          ...prev,
-        ].slice(0, 5),
-      );
+      if (!isDuplicateRecognition) {
+        setPhrasePulse(true);
+        setSubtitleVisible(false);
+        window.setTimeout(() => {
+          setRecognizedGloss(nextGloss);
+          setRecognizedTranslation(phrase);
+          setSubtitleVisible(true);
+        }, 180);
+        window.setTimeout(() => setPhrasePulse(false), 650);
+        setTranslationFeed((prev) =>
+          [
+            {
+              id: now,
+              gloss: nextGloss,
+              translation: phrase,
+              timestamp: now,
+              confidence: score,
+            },
+            ...prev,
+          ].slice(0, 5),
+        );
+      }
     },
-    [intentToGloss],
+    [FEED_DUPLICATE_WINDOW_MS, intentToGloss],
   );
+
+  const resetRecognitionToIdle = useCallback(() => {
+    lastRecognitionKeyRef.current = "";
+    lastRecognitionAtRef.current = 0;
+    setRecognizedIntent(null);
+    setConfidence(0);
+    setRecognizedGloss("[WAITING FOR HAND]");
+    setRecognizedTranslation("Show a hand gesture to begin");
+    setSubtitleVisible(true);
+    setPhrasePulse(false);
+    setAudioState("idle");
+    setIsSpeaking(false);
+  }, []);
 
   const speakPhrase = useCallback(async (text: string) => {
     const now = Date.now();
@@ -195,10 +262,22 @@ export default function StudioPage() {
         setHandDetected(result.hand_detected);
         setConfidence(result.confidence ?? 0);
         if (result.intent && result.phrase) {
+          noHandSinceRef.current = null;
           updateRecognition(result.intent, result.phrase, result.confidence);
           void speakPhrase(result.phrase);
         } else {
           setIsSpeaking(false);
+          if (!result.hand_detected) {
+            const now = Date.now();
+            if (noHandSinceRef.current === null) {
+              noHandSinceRef.current = now;
+            }
+            if (now - noHandSinceRef.current >= NO_HAND_RESET_MS) {
+              resetRecognitionToIdle();
+            }
+          } else {
+            noHandSinceRef.current = null;
+          }
           if (result.error) {
             setDetectionError(result.error);
           }
@@ -220,7 +299,7 @@ export default function StudioPage() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [cameraStatus, captureFrame, speakPhrase, updateRecognition]);
+  }, [cameraStatus, captureFrame, resetRecognitionToIdle, speakPhrase, updateRecognition]);
 
   useEffect(() => {
     const audio = audioRef.current;
