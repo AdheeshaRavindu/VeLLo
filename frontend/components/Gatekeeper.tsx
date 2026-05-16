@@ -35,21 +35,21 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
 
   if (permissionState === "denied") {
     return (
-      <main className="relative h-[100dvh] w-full overflow-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-4 text-emerald-950 sm:px-6">
+      <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-4 text-emerald-950 sm:px-6 lg:h-[100dvh] lg:overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_38%,rgba(16,185,129,0.16),transparent_45%),radial-gradient(circle_at_72%_42%,rgba(132,204,22,0.14),transparent_38%)]" />
-        <div className="relative mx-auto flex h-full max-w-3xl items-center justify-center">
-          <div className="w-full rounded-3xl border border-red-300/40 bg-white/80 p-8 text-center shadow-[0_0_60px_rgba(239,68,68,0.12)] backdrop-blur-xl sm:p-10">
-            <h1 className="text-3xl font-bold tracking-tight text-red-400 sm:text-5xl">
+        <div className="relative mx-auto flex min-h-[100dvh] max-w-3xl items-center justify-center py-6 lg:h-full lg:min-h-0">
+          <div className="w-full rounded-3xl border border-red-300/40 bg-white/80 p-6 text-center shadow-[0_0_60px_rgba(239,68,68,0.12)] backdrop-blur-xl sm:p-8 lg:p-10">
+            <h1 className="text-2xl font-bold tracking-tight text-red-400 sm:text-4xl lg:text-5xl">
               We can&apos;t see you! 🙈
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-emerald-900/80 sm:text-base">
+            <p className="mx-auto mt-3 max-w-xl text-xs leading-relaxed text-emerald-900/80 sm:mt-4 sm:text-sm lg:text-base">
               It looks like your camera is blocked. Click the lock icon in your
               browser&apos;s address bar to allow access, then refresh the page.
             </p>
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="mt-7 inline-flex h-12 items-center justify-center rounded-full border border-emerald-300 bg-emerald-600 px-6 text-sm font-semibold text-white transition hover:border-emerald-400 hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-full border border-emerald-300 bg-emerald-600 px-6 text-sm font-semibold text-white transition hover:border-emerald-400 hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:mt-7 sm:h-12"
             >
               Refresh Page
             </button>
@@ -60,18 +60,18 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   }
 
   return (
-    <main className="relative h-[100dvh] w-full overflow-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-4 text-emerald-950 sm:px-6">
+    <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-4 text-emerald-950 sm:px-6 lg:h-[100dvh] lg:overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_38%,rgba(16,185,129,0.18),transparent_45%),radial-gradient(circle_at_72%_42%,rgba(132,204,22,0.16),transparent_38%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(236,253,245,0.85),transparent_60%)]" />
 
-      <section className="relative mx-auto flex h-full w-full max-w-5xl flex-col items-center justify-center text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/75 px-4 py-2 text-[11px] font-medium tracking-[0.14em] text-emerald-700 shadow-[0_0_18px_rgba(16,185,129,0.16)] transition hover:border-emerald-300 hover:shadow-[0_0_26px_rgba(16,185,129,0.22)]">
-          <Sparkles className="h-3.5 w-3.5 text-lime-600" aria-hidden="true" />
+      <section className="relative mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col items-center justify-center py-5 text-center sm:py-8 lg:h-full lg:min-h-0">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-[10px] font-medium tracking-[0.13em] text-emerald-700 shadow-[0_0_18px_rgba(16,185,129,0.16)] transition hover:border-emerald-300 hover:shadow-[0_0_26px_rgba(16,185,129,0.22)] sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.14em]">
+          <Sparkles className="h-3 w-3 text-lime-600 sm:h-3.5 sm:w-3.5" aria-hidden="true" />
           AI POWERED SIGN DETECTION
         </span>
 
         <h1
-          className={`mt-4 max-w-4xl text-4xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:text-5xl lg:text-6xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
+          className={`mt-3 max-w-4xl text-3xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-4 sm:text-4xl lg:text-6xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
         >
           Let&apos;s give your{" "}
           <span className="bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-clip-text text-transparent">
@@ -80,21 +80,21 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
         </h1>
 
         <p
-          className={`mt-3 text-base font-semibold tracking-wide text-emerald-800/85 sm:text-xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:120ms]`}
+          className={`mt-2 text-sm font-semibold tracking-wide text-emerald-800/85 sm:mt-3 sm:text-base lg:text-xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:120ms]`}
         >
           Signs into real-time voice translation.
         </p>
 
         <p
-          className={`mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-emerald-800/75 sm:text-sm ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:220ms]`}
+          className={`mx-auto mt-2 max-w-[330px] px-1 text-xs leading-relaxed text-emerald-800/75 sm:mt-3 sm:max-w-2xl sm:px-0 sm:text-sm ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:220ms]`}
         >
           To translate your signs into spoken words, the system needs to see your
           movements. We don&apos;t record or store your video - everything processes
           live on your screen.
         </p>
 
-        <div className="mt-4 w-full rounded-[32px] border border-emerald-200/70 bg-white/55 p-4 shadow-[0_18px_42px_rgba(6,95,70,0.18),0_0_42px_rgba(16,185,129,0.14)] backdrop-blur-2xl">
-          <div className="relative h-[220px] overflow-hidden rounded-[28px] border border-emerald-300/45 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[250px] lg:h-[320px]">
+        <div className="mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_18px_42px_rgba(6,95,70,0.18),0_0_42px_rgba(16,185,129,0.14)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-4">
+          <div className="relative h-[180px] overflow-hidden rounded-[24px] border border-emerald-300/45 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[250px] sm:rounded-[28px] lg:h-[320px]">
             <img
               src="/models/woman-sign.png"
               alt="Woman demonstrating a sign language hand gesture"
@@ -103,75 +103,75 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/30 via-emerald-900/5 to-transparent" />
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(16,185,129,0.18),transparent_45%)]" />
 
-            <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-3 py-1 text-[10px] font-medium tracking-[0.08em] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2.5 py-1 text-[9px] font-medium tracking-[0.08em] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.25)] sm:left-4 sm:top-4 sm:gap-1.5 sm:px-3 sm:text-[10px]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-600 shadow-[0_0_8px_rgba(5,150,105,0.7)]" />
               LIVE
             </span>
 
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 rounded-xl border border-emerald-300/50 bg-white/72 px-3 py-2 text-left text-xs text-emerald-900 shadow-[0_0_14px_rgba(16,185,129,0.16)] backdrop-blur-xl">
-              <span className="flex items-center gap-1.5">
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/72 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_14px_rgba(16,185,129,0.16)] backdrop-blur-xl sm:left-4 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
+              <span className="flex items-center gap-1 sm:gap-1.5">
                 <AudioLines
-                  className={`h-3.5 w-3.5 text-emerald-600 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
+                  className={`h-3 w-3 text-emerald-600 sm:h-3.5 sm:w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
                   aria-hidden="true"
                 />
                 Listening...
               </span>
             </div>
 
-            <div className="absolute bottom-4 right-4 rounded-xl border border-lime-300/60 bg-white/72 px-3.5 py-2 text-center shadow-[0_0_16px_rgba(132,204,22,0.16)] backdrop-blur-xl sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2">
-              <p className="text-[9px] tracking-[0.16em] text-emerald-700">DETECTED SIGN</p>
-              <p className="bg-gradient-to-b from-emerald-600 to-lime-600 bg-clip-text text-2xl font-bold leading-none text-transparent animate-pulse">
+            <div className="absolute bottom-2 right-2 rounded-lg border border-lime-300/60 bg-white/72 px-2.5 py-1.5 text-center shadow-[0_0_16px_rgba(132,204,22,0.16)] backdrop-blur-xl sm:bottom-auto sm:right-4 sm:top-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:px-3.5 sm:py-2">
+              <p className="text-[8px] tracking-[0.14em] text-emerald-700 sm:text-[9px] sm:tracking-[0.16em]">DETECTED SIGN</p>
+              <p className="bg-gradient-to-b from-emerald-600 to-lime-600 bg-clip-text text-xl font-bold leading-none text-transparent animate-pulse sm:text-2xl">
                 L
               </p>
-              <p className="mt-0.5 text-[9px] tracking-[0.16em] text-emerald-600/80">LETTER</p>
+              <p className="mt-0.5 text-[8px] tracking-[0.14em] text-emerald-600/80 sm:text-[9px] sm:tracking-[0.16em]">LETTER</p>
             </div>
 
-            <div className="pointer-events-none absolute inset-[18%_28%] rounded-2xl border border-emerald-400/45 shadow-[0_0_20px_rgba(16,185,129,0.24)]" />
-            <div className="pointer-events-none absolute inset-[18%_28%] rounded-2xl border border-emerald-100/70" />
+            <div className="pointer-events-none absolute inset-[20%_30%] rounded-xl border border-emerald-400/45 shadow-[0_0_20px_rgba(16,185,129,0.24)] sm:inset-[18%_28%] sm:rounded-2xl" />
+            <div className="pointer-events-none absolute inset-[20%_30%] rounded-xl border border-emerald-100/70 sm:inset-[18%_28%] sm:rounded-2xl" />
 
-            <div className="pointer-events-none absolute left-6 top-6 h-9 w-9 border-l-2 border-t-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)]" />
-            <div className="pointer-events-none absolute right-6 top-6 h-9 w-9 border-r-2 border-t-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)]" />
-            <div className="pointer-events-none absolute bottom-6 left-6 h-9 w-9 border-b-2 border-l-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)]" />
-            <div className="pointer-events-none absolute bottom-6 right-6 h-9 w-9 border-b-2 border-r-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)]" />
+            <div className="pointer-events-none absolute left-3 top-3 h-6 w-6 border-l-2 border-t-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:left-6 sm:top-6 sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute right-3 top-3 h-6 w-6 border-r-2 border-t-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:right-6 sm:top-6 sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute bottom-3 left-3 h-6 w-6 border-b-2 border-l-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:bottom-6 sm:left-6 sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute bottom-3 right-3 h-6 w-6 border-b-2 border-r-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:bottom-6 sm:right-6 sm:h-9 sm:w-9" />
           </div>
         </div>
 
-        <div className="mt-4 w-full max-w-3xl">
+        <div className="mt-3 w-full max-w-3xl sm:mt-4">
           <button
             type="button"
             disabled={permissionState === "requesting"}
             onClick={requestPermission}
-            className="group w-full rounded-full bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-[length:200%_100%] [background-position:0%_50%] p-[1.5px] shadow-[0_0_36px_rgba(16,185,129,0.32)] transition-[transform,box-shadow,background-position] duration-300 ease-out hover:scale-[1.01] hover:[background-position:100%_50%] hover:shadow-[0_0_54px_rgba(16,185,129,0.45)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            className="group w-full rounded-full bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-[length:200%_100%] [background-position:0%_50%] p-[1.5px] shadow-[0_0_36px_rgba(16,185,129,0.32)] transition-[transform,box-shadow,background-position] duration-300 ease-out active:scale-[0.995] hover:scale-[1.01] hover:[background-position:100%_50%] hover:shadow-[0_0_54px_rgba(16,185,129,0.45)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
-            <span className="flex w-full items-center justify-between gap-3 rounded-full border border-emerald-200/70 bg-white/65 px-5 py-3.5 text-left backdrop-blur-xl sm:px-7">
+            <span className="flex w-full items-center justify-between gap-2 rounded-full border border-emerald-200/70 bg-white/65 px-4 py-3 text-left backdrop-blur-xl sm:gap-3 sm:px-7 sm:py-3.5">
               <span className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500/10 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500/10 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.2)] sm:h-10 sm:w-10">
                   {permissionState === "requesting" ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white" />
                   ) : (
-                    <Camera className="h-5 w-5" aria-hidden="true" />
+                    <Camera className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                   )}
                 </span>
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-lime-200/80 bg-lime-500/10 text-lime-700 shadow-[0_0_12px_rgba(132,204,22,0.2)]">
-                  <Mic className="h-5 w-5" aria-hidden="true" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-lime-200/80 bg-lime-500/10 text-lime-700 shadow-[0_0_12px_rgba(132,204,22,0.2)] sm:h-10 sm:w-10">
+                  <Mic className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-emerald-900 sm:text-lg">
+                  <span className="block text-sm font-semibold text-emerald-900 sm:text-base lg:text-lg">
                     {permissionState === "requesting"
                       ? "Waiting for permission..."
                       : "Enable Camera & Mic"}
                   </span>
-                  <span className="block text-xs text-emerald-800/80 sm:text-sm">
+                  <span className="block text-[11px] text-emerald-800/80 sm:text-sm">
                     Click to get started
                   </span>
                 </span>
               </span>
-              <ArrowRight className="h-5 w-5 text-emerald-800 transition duration-300 group-hover:translate-x-1.5" aria-hidden="true" />
+              <ArrowRight className="h-4 w-4 text-emerald-800 transition duration-300 group-hover:translate-x-1.5 sm:h-5 sm:w-5" aria-hidden="true" />
             </span>
           </button>
 
-          <p className="mt-2 inline-flex items-center gap-2 text-xs text-emerald-800/75">
-            <Lock className="h-3.5 w-3.5 text-emerald-700" aria-hidden="true" />
+          <p className="mt-2 inline-flex max-w-[320px] items-start gap-1.5 text-center text-[11px] text-emerald-800/75 sm:max-w-none sm:items-center sm:gap-2 sm:text-xs">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700 sm:mt-0" aria-hidden="true" />
             A browser popup will appear next. Please click &quot;Allow&quot; to start.
           </p>
         </div>
