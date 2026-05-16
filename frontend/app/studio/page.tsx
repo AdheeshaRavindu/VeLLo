@@ -18,12 +18,6 @@ export default function StudioPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#0b1328]/85 via-[#0b1224]/88 to-[#070b16]/94" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(99,102,241,0.2),transparent_45%)]" />
 
-          <img
-            src="/models/woman-sign.png"
-            alt="Live sign language camera feed"
-            className="absolute inset-0 h-full w-full object-contain object-center"
-          />
-
           <div className="pointer-events-none absolute inset-[12%_34%_10%_34%] rounded-2xl border border-blue-300/40 shadow-[0_0_26px_rgba(59,130,246,0.3)]" />
           <div className="pointer-events-none absolute inset-[12%_34%_10%_34%] rounded-2xl border border-violet-300/25" />
 
