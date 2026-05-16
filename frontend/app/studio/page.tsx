@@ -18,6 +18,12 @@ const DETECTION_INTERVAL_MS = 320;
 const DUPLICATE_GESTURE_WINDOW_MS = 1200;
 const PHRASE_INACTIVITY_TIMEOUT_MS = 2600;
 const PHRASE_SEPARATOR = ", ";
+const MIN_TRIGGER_CONFIDENCE = 0.8;
+const MIN_CONSECUTIVE_DETECTIONS = 2;
+const MIN_EVENT_INTERVAL_MS = 900;
+const LOCK_RELEASE_NO_HAND_MS = 650;
+const LOCK_RELEASE_NO_GESTURE_MS = 1000;
+const RESET_CONFIDENCE = 0.58;
 
 type BufferedGesture = {
   intent: Intent;
@@ -37,6 +43,24 @@ export default function StudioPage() {
   const lastAcceptedGestureRef = useRef<{ intent: Intent | null; timestamp: number }>({
     intent: null,
     timestamp: 0,
+  });
+  const gestureLockRef = useRef<{ locked: boolean; intent: Intent | null }>({
+    locked: false,
+    intent: null,
+  });
+  const noHandSinceRef = useRef<number | null>(null);
+  const noGestureSinceRef = useRef<number | null>(null);
+  const lastGestureEventAtRef = useRef(0);
+  const candidateRef = useRef<{
+    intent: Intent | null;
+    phrase: string;
+    confidence: number;
+    count: number;
+  }>({
+    intent: null,
+    phrase: "",
+    confidence: 0,
+    count: 0,
   });
   const objectUrlRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
@@ -59,6 +83,7 @@ export default function StudioPage() {
   const [gestureBuffer, setGestureBuffer] = useState<BufferedGesture[]>([]);
   const [phrasePreview, setPhrasePreview] = useState("");
   const [lastPlayedPhrase, setLastPlayedPhrase] = useState<string | null>(null);
+  const [gestureLockState, setGestureLockState] = useState<"locked" | "ready">("ready");
   const [detectionError, setDetectionError] = useState<string | null>(null);
   const [translationFeed, setTranslationFeed] = useState<
     Array<{ id: number; gloss: string; translation: string; timestamp: number; confidence: number }>
@@ -97,6 +122,28 @@ export default function StudioPage() {
       inactivityTimerRef.current = null;
     }
   }, []);
+
+  const resetCandidate = useCallback(() => {
+    candidateRef.current = {
+      intent: null,
+      phrase: "",
+      confidence: 0,
+      count: 0,
+    };
+  }, []);
+
+  const lockGesture = useCallback((intent: Intent) => {
+    gestureLockRef.current = { locked: true, intent };
+    setGestureLockState("locked");
+  }, []);
+
+  const unlockGesture = useCallback(() => {
+    gestureLockRef.current = { locked: false, intent: null };
+    setGestureLockState("ready");
+    noHandSinceRef.current = null;
+    noGestureSinceRef.current = null;
+    resetCandidate();
+  }, [resetCandidate]);
 
   const updateRecognition = useCallback(
     (intent: Intent, phrase: string, score: number) => {
@@ -164,9 +211,9 @@ export default function StudioPage() {
     }
   }, []);
 
-  const finalizeBufferedPhrase = useCallback(async () => {
+  const finalizeBufferedPhrase = useCallback(async (entries?: BufferedGesture[]) => {
     clearInactivityTimer();
-    const bufferSnapshot = gestureBufferRef.current;
+    const bufferSnapshot = entries ?? gestureBufferRef.current;
     if (bufferSnapshot.length === 0) {
       return;
     }
@@ -206,14 +253,21 @@ export default function StudioPage() {
       }
       lastAcceptedGestureRef.current = { intent, timestamp: now };
       updateRecognition(intent, phrase, score);
-      setGestureBuffer((prev) => {
-        const next = [...prev, { intent, phrase, timestamp: now, confidence: score }];
-        setPhrasePreview(buildCombinedPhrase(next));
-        return next;
-      });
+      const nextBuffer = [
+        ...gestureBufferRef.current,
+        { intent, phrase, timestamp: now, confidence: score },
+      ];
+      gestureBufferRef.current = nextBuffer;
+      setGestureBuffer(nextBuffer);
+      setPhrasePreview(buildCombinedPhrase(nextBuffer));
+
+      if (!playbackBusyRef.current && nextBuffer.length === 1) {
+        void finalizeBufferedPhrase(nextBuffer);
+        return;
+      }
       scheduleAutoFinalize();
     },
-    [buildCombinedPhrase, scheduleAutoFinalize, updateRecognition],
+    [buildCombinedPhrase, finalizeBufferedPhrase, scheduleAutoFinalize, updateRecognition],
   );
 
   const captureFrame = useCallback((): string | null => {
@@ -291,15 +345,80 @@ export default function StudioPage() {
       try {
         const result = await detectSign({ image_base64: image });
         if (cancelled) return;
+        const now = Date.now();
+        const hasRecognizedGesture =
+          Boolean(result.intent && result.phrase) && (result.confidence ?? 0) >= MIN_TRIGGER_CONFIDENCE;
+
         setHandDetected(result.hand_detected);
         setConfidence(result.confidence ?? 0);
-        if (result.intent && result.phrase) {
-          pushGestureToBuffer(result.intent, result.phrase, result.confidence);
+
+        if (!result.hand_detected) {
+          noHandSinceRef.current = noHandSinceRef.current ?? now;
+          noGestureSinceRef.current = noGestureSinceRef.current ?? now;
+          if (
+            gestureLockRef.current.locked &&
+            now - noHandSinceRef.current >= LOCK_RELEASE_NO_HAND_MS
+          ) {
+            unlockGesture();
+          }
         } else {
-          setIsSpeaking(false);
+          noHandSinceRef.current = null;
+        }
+
+        if (gestureLockRef.current.locked) {
+          const lockIntent = gestureLockRef.current.intent;
+          const stillHoldingLockedGesture =
+            hasRecognizedGesture &&
+            result.intent === lockIntent &&
+            (result.confidence ?? 0) >= RESET_CONFIDENCE;
+          if (stillHoldingLockedGesture) {
+            noGestureSinceRef.current = null;
+            resetCandidate();
+          } else {
+            noGestureSinceRef.current = noGestureSinceRef.current ?? now;
+            if (
+              now - noGestureSinceRef.current >= LOCK_RELEASE_NO_GESTURE_MS &&
+              (result.confidence ?? 0) < RESET_CONFIDENCE
+            ) {
+              unlockGesture();
+            }
+          }
+        } else if (hasRecognizedGesture && result.intent && result.phrase) {
+          if (now - lastGestureEventAtRef.current >= MIN_EVENT_INTERVAL_MS) {
+            if (candidateRef.current.intent === result.intent) {
+              candidateRef.current = {
+                intent: result.intent,
+                phrase: result.phrase,
+                confidence: result.confidence,
+                count: candidateRef.current.count + 1,
+              };
+            } else {
+              candidateRef.current = {
+                intent: result.intent,
+                phrase: result.phrase,
+                confidence: result.confidence,
+                count: 1,
+              };
+            }
+
+            if (candidateRef.current.count >= MIN_CONSECUTIVE_DETECTIONS) {
+              pushGestureToBuffer(result.intent, result.phrase, result.confidence);
+              lastGestureEventAtRef.current = now;
+              lockGesture(result.intent);
+              resetCandidate();
+            }
+          }
+        } else {
+          resetCandidate();
+        }
+
+        if (!hasRecognizedGesture) {
           if (result.error) {
             setDetectionError(result.error);
+          } else {
+            setDetectionError(null);
           }
+          setIsSpeaking(false);
         }
       } catch {
         if (!cancelled) {
@@ -318,7 +437,7 @@ export default function StudioPage() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [cameraStatus, captureFrame, pushGestureToBuffer]);
+  }, [cameraStatus, captureFrame, lockGesture, pushGestureToBuffer, resetCandidate, unlockGesture]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -623,6 +742,10 @@ export default function StudioPage() {
                       Playback:{" "}
                       <span className="font-semibold text-emerald-100">{audioState}</span>
                     </p>
+                    <p className="mt-1 text-[10px] text-emerald-100/65">
+                      Gesture Lock:{" "}
+                      <span className="font-semibold text-emerald-100">{gestureLockState}</span>
+                    </p>
                   </div>
                 </article>
 
@@ -783,6 +906,9 @@ export default function StudioPage() {
                 </p>
                 <p className="mt-1 text-[10px] text-emerald-100/65">
                   Playback: <span className="font-semibold text-emerald-100">{audioState}</span>
+                </p>
+                <p className="mt-1 text-[10px] text-emerald-100/65">
+                  Gesture Lock: <span className="font-semibold text-emerald-100">{gestureLockState}</span>
                 </p>
               </div>
             </article>
