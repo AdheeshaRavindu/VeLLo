@@ -12,6 +12,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
+      - ./shared:/shared:ro
     ports:
       - "8000:8000"
     restart: unless-stopped

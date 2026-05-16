@@ -2,11 +2,30 @@ import json
 from pathlib import Path
 
 
+DEFAULT_PHRASE_MAP: dict[str, str] = {
+    "yes": "Yes.",
+    "no": "No.",
+    "i_need_help": "I need help.",
+}
+
+
+def _candidate_phrase_files() -> list[Path]:
+    root = Path(__file__).resolve()
+    return [
+        root.parents[3] / "shared" / "hospital_phrases.json",
+        root.parents[2] / "shared" / "hospital_phrases.json",
+        Path("/shared/hospital_phrases.json"),
+    ]
+
+
 def _load_phrase_map() -> dict[str, str]:
-    shared_file = Path(__file__).resolve().parents[3] / "shared" / "hospital_phrases.json"
-    if not shared_file.exists():
-        return {}
-    return json.loads(shared_file.read_text(encoding="utf-8"))
+    for shared_file in _candidate_phrase_files():
+        if not shared_file.exists():
+            continue
+        loaded = json.loads(shared_file.read_text(encoding="utf-8"))
+        if isinstance(loaded, dict):
+            return {**DEFAULT_PHRASE_MAP, **loaded}
+    return DEFAULT_PHRASE_MAP.copy()
 
 
 PHRASE_MAP = _load_phrase_map()

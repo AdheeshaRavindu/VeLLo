@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Captions,
   ChevronLeft,
@@ -10,28 +10,129 @@ import {
   Video,
   Volume2,
 } from "lucide-react";
+import { detectSign, synthesizeVoice } from "@/services/api";
+import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
+import type { Intent } from "@/types";
 
 export default function StudioPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastSpokenTextRef = useRef<string>("");
+  const lastSpokenAtRef = useRef<number>(0);
+  const inFlightRef = useRef(false);
+
   const [cameraStatus, setCameraStatus] = useState<"loading" | "ready" | "denied">(
     "loading",
   );
-  const [subtitleVisible, setSubtitleVisible] = useState(true);
-  const [subtitleIndex, setSubtitleIndex] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(true);
+  const [subtitleVisible, setSubtitleVisible] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [phrasePulse, setPhrasePulse] = useState(false);
+  const [audioState, setAudioState] = useState<"idle" | "generating" | "playing" | "error">(
+    "idle",
+  );
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [handDetected, setHandDetected] = useState(false);
+  const [confidence, setConfidence] = useState(0);
+  const [recognizedIntent, setRecognizedIntent] = useState<Intent | null>(null);
+  const [recognizedGloss, setRecognizedGloss] = useState("[WAITING FOR HAND]");
+  const [recognizedTranslation, setRecognizedTranslation] = useState("Show a hand gesture to begin");
+  const [detectionError, setDetectionError] = useState<string | null>(null);
   const [translationFeed, setTranslationFeed] = useState<
-    Array<{ id: number; gloss: string; translation: string; timestamp: number }>
+    Array<{ id: number; gloss: string; translation: string; timestamp: number; confidence: number }>
   >([]);
   const [panelOpen, setPanelOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const touchStartY = useRef<number | null>(null);
 
-  const subtitleFrames = [
-    { gloss: "[YOU] [NAME] [WHAT]", translation: "What is your name?" },
-    { gloss: "[I] [LEARN] [SIGN] [LANGUAGE]", translation: "I am learning sign language." },
-    { gloss: "[PLEASE] [REPEAT] [SLOW]", translation: "Please repeat that slowly." },
-  ];
+  const subtitleFrames = [{ gloss: recognizedGloss, translation: recognizedTranslation }];
+  const subtitleIndex = 0;
+
+  const intentToGloss = useCallback((intent: Intent | null) => {
+    if (intent === "yes") return "[YES]";
+    if (intent === "no") return "[NO]";
+    if (intent === "i_need_help") return "[I] [NEED] [HELP]";
+    return "[UNRECOGNIZED]";
+  }, []);
+
+  const updateRecognition = useCallback(
+    (intent: Intent, phrase: string, score: number) => {
+      const nextGloss = intentToGloss(intent);
+      setRecognizedIntent(intent);
+      setConfidence(score);
+      setPhrasePulse(true);
+      setSubtitleVisible(false);
+      window.setTimeout(() => {
+        setRecognizedGloss(nextGloss);
+        setRecognizedTranslation(phrase);
+        setSubtitleVisible(true);
+      }, 180);
+      window.setTimeout(() => setPhrasePulse(false), 650);
+      setTranslationFeed((prev) =>
+        [
+          {
+            id: Date.now(),
+            gloss: nextGloss,
+            translation: phrase,
+            timestamp: Date.now(),
+            confidence: score,
+          },
+          ...prev,
+        ].slice(0, 5),
+      );
+    },
+    [intentToGloss],
+  );
+
+  const speakPhrase = useCallback(async (text: string) => {
+    const now = Date.now();
+    if (lastSpokenTextRef.current === text && now - lastSpokenAtRef.current < 2500) {
+      return;
+    }
+    lastSpokenTextRef.current = text;
+    lastSpokenAtRef.current = now;
+
+    try {
+      setAudioState("generating");
+      const voiceResult = await synthesizeVoice({ text });
+      if (voiceResult.audio_base64) {
+        const src = base64ToObjectUrl(voiceResult.audio_base64, voiceResult.content_type);
+        if (audioRef.current) {
+          audioRef.current.src = src;
+          await audioRef.current.play();
+          setAudioState("playing");
+          setIsSpeaking(true);
+          return;
+        }
+      }
+      speakFallback(text);
+      setAudioState("playing");
+      setIsSpeaking(true);
+    } catch {
+      speakFallback(text);
+      setAudioState("error");
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  const captureFrame = useCallback((): string | null => {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+      return null;
+    }
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement("canvas");
+    }
+    const canvas = canvasRef.current;
+    const width = Math.min(960, video.videoWidth);
+    const scale = width / video.videoWidth;
+    canvas.width = width;
+    canvas.height = Math.round(video.videoHeight * scale);
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.8);
+  }, []);
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -64,49 +165,71 @@ export default function StudioPage() {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     };
   }, []);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setSubtitleVisible(false);
+    if (cameraStatus !== "ready") {
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setInterval(async () => {
+      if (cancelled || inFlightRef.current) {
+        return;
+      }
+      const image = captureFrame();
+      if (!image) {
+        return;
+      }
+      inFlightRef.current = true;
+      setIsDetecting(true);
+      setDetectionError(null);
+      try {
+        const result = await detectSign({ image_base64: image });
+        if (cancelled) return;
+        setHandDetected(result.hand_detected);
+        setConfidence(result.confidence ?? 0);
+        if (result.intent && result.phrase) {
+          updateRecognition(result.intent, result.phrase, result.confidence);
+          void speakPhrase(result.phrase);
+        } else {
+          setIsSpeaking(false);
+          if (result.error) {
+            setDetectionError(result.error);
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setDetectionError("Detection request failed");
+          setHandDetected(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsDetecting(false);
+        }
+        inFlightRef.current = false;
+      }
+    }, 320);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [cameraStatus, captureFrame, speakPhrase, updateRecognition]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const handleEnded = () => {
       setIsSpeaking(false);
-      window.setTimeout(() => {
-        setSubtitleIndex((prev) => (prev + 1) % subtitleFrames.length);
-        setSubtitleVisible(true);
-        setIsSpeaking(true);
-      }, 220);
-    }, 4200);
-
-    return () => window.clearInterval(timer);
-  }, [subtitleFrames.length]);
-
-  useEffect(() => {
-    if (!isSpeaking) return;
-    const timer = window.setTimeout(() => setIsSpeaking(false), 2600);
-    return () => window.clearTimeout(timer);
-  }, [subtitleIndex, isSpeaking]);
-
-  useEffect(() => {
-    setPhrasePulse(true);
-    const timer = window.setTimeout(() => setPhrasePulse(false), 700);
-    return () => window.clearTimeout(timer);
-  }, [subtitleIndex]);
-
-  useEffect(() => {
-    const frame = subtitleFrames[subtitleIndex];
-    setTranslationFeed((prev) =>
-      [
-        {
-          id: Date.now(),
-          gloss: frame.gloss,
-          translation: frame.translation,
-          timestamp: Date.now(),
-        },
-        ...prev,
-      ].slice(0, 5),
-    );
-  }, [subtitleIndex, subtitleFrames]);
+      setAudioState("idle");
+    };
+    audio.addEventListener("ended", handleEnded);
+    return () => audio.removeEventListener("ended", handleEnded);
+  }, []);
 
   const cameraHealth =
     cameraStatus === "ready"
@@ -117,15 +240,19 @@ export default function StudioPage() {
   const aiProcessingHealth =
     cameraStatus === "denied"
       ? "error"
-      : subtitleVisible
+      : isDetecting
         ? "active"
-        : "processing";
+        : detectionError
+          ? "error"
+          : "standby";
   const audioReadyHealth =
     cameraStatus === "denied"
       ? "error"
-      : isSpeaking
+      : audioState === "playing" || isSpeaking
         ? "active"
-        : "processing";
+        : audioState === "generating"
+          ? "processing"
+          : "standby";
 
   const detectionSignals = [
     {
@@ -137,26 +264,51 @@ export default function StudioPage() {
     {
       label: "Hand Detected",
       stateText:
-        cameraStatus === "denied" ? "DISCONNECTED" : subtitleVisible ? "DETECTING" : "STANDBY",
-      tone: cameraStatus === "denied" ? "error" : subtitleVisible ? "active" : "standby",
+        cameraStatus === "denied" ? "DISCONNECTED" : handDetected ? "DETECTED" : "STANDBY",
+      tone: cameraStatus === "denied" ? "error" : handDetected ? "active" : "standby",
     },
     {
       label: "AI Processing",
       stateText:
-        cameraStatus === "denied" ? "DISCONNECTED" : subtitleVisible ? "PROCESSING" : "STANDBY",
-      tone: cameraStatus === "denied" ? "error" : subtitleVisible ? "processing" : "standby",
+        cameraStatus === "denied"
+          ? "DISCONNECTED"
+          : detectionError
+            ? "ERROR"
+            : isDetecting
+              ? "PROCESSING"
+              : "STANDBY",
+      tone:
+        cameraStatus === "denied"
+          ? "error"
+          : detectionError
+            ? "error"
+            : isDetecting
+              ? "processing"
+              : "standby",
     },
     {
       label: "Voice Output Ready",
       stateText:
-        cameraStatus === "denied" ? "DISCONNECTED" : isSpeaking ? "SPEAKING" : "STANDBY",
-      tone: cameraStatus === "denied" ? "error" : isSpeaking ? "active" : "standby",
+        cameraStatus === "denied"
+          ? "DISCONNECTED"
+          : audioState === "generating"
+            ? "GENERATING"
+            : isSpeaking
+              ? "SPEAKING"
+              : "STANDBY",
+      tone:
+        cameraStatus === "denied"
+          ? "error"
+          : audioState === "generating"
+            ? "processing"
+            : isSpeaking
+              ? "active"
+              : "standby",
     },
   ] as const;
   const currentFrame = subtitleFrames[subtitleIndex];
   const recognizedPhrase = currentFrame.translation.replace(/[.?!]/g, "").toUpperCase();
-  const confidenceText =
-    cameraStatus === "ready" ? "96%" : cameraStatus === "loading" ? "78%" : "0%";
+  const confidenceText = `${Math.round(confidence * 100)}%`;
   const liveTranslationStream = translationFeed.slice(0, 5);
   const formatRelativeTime = (timestamp: number) => {
     const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -327,6 +479,12 @@ export default function StudioPage() {
                     <p className="mt-3 text-[10px] text-emerald-100/65">
                       Confidence: <span className="font-semibold text-emerald-100">{confidenceText}</span>
                     </p>
+                    <p className="mt-1 text-[10px] text-emerald-100/65">
+                      Intent:{" "}
+                      <span className="font-semibold text-emerald-100">
+                        {recognizedIntent ? recognizedIntent.replaceAll("_", " ") : "none"}
+                      </span>
+                    </p>
                   </div>
                 </article>
 
@@ -353,6 +511,9 @@ export default function StudioPage() {
                           {item.gloss}
                         </p>
                         <p className="mt-0.5 text-[11px] font-semibold text-white">{item.translation}</p>
+                        <p className="mt-0.5 text-[9px] text-emerald-200/55">
+                          confidence {Math.round(item.confidence * 100)}%
+                        </p>
                         <p className="mt-0.5 text-[9px] text-emerald-200/55">
                           {formatRelativeTime(item.timestamp)}
                         </p>
@@ -464,6 +625,12 @@ export default function StudioPage() {
                 <p className="mt-2.5 text-[10px] text-emerald-100/65">
                   Confidence: <span className="font-semibold text-emerald-100">{confidenceText}</span>
                 </p>
+                <p className="mt-1 text-[10px] text-emerald-100/65">
+                  Intent:{" "}
+                  <span className="font-semibold text-emerald-100">
+                    {recognizedIntent ? recognizedIntent.replaceAll("_", " ") : "none"}
+                  </span>
+                </p>
               </div>
             </article>
 
@@ -489,6 +656,9 @@ export default function StudioPage() {
                     <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-100/65">{item.gloss}</p>
                     <p className="mt-0.5 text-xs font-semibold text-white">{item.translation}</p>
                     <p className="mt-0.5 text-[9px] text-emerald-200/55">
+                      confidence {Math.round(item.confidence * 100)}%
+                    </p>
+                    <p className="mt-0.5 text-[9px] text-emerald-200/55">
                       {formatRelativeTime(item.timestamp)}
                     </p>
                   </div>
@@ -498,6 +668,7 @@ export default function StudioPage() {
           </div>
         </div>
       </aside>
+      <audio ref={audioRef} className="hidden" />
     </main>
   );
 }
