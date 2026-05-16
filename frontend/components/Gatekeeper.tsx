@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, Camera, Lock, Mic } from "lucide-react";
 
 type PermissionState = "idle" | "requesting" | "denied";
@@ -13,6 +13,31 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   const [permissionState, setPermissionState] = useState<PermissionState>("idle");
+
+  useEffect(() => {
+    const mainEl = document.getElementById("gatekeeper-root");
+    const styleSheets = Array.from(document.styleSheets || []);
+    const styleSheetHrefs = styleSheets
+      .map((sheet) => {
+        try {
+          return (sheet as CSSStyleSheet).href || "inline";
+        } catch {
+          return "inaccessible";
+        }
+      })
+      .slice(0, 8);
+
+    // #region agent log
+    fetch("http://127.0.0.1:7613/ingest/52c74c4f-229c-4906-8eec-ed86f8bcaaad",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"57db8f"},body:JSON.stringify({sessionId:"57db8f",runId:"pre-fix",hypothesisId:"H1",location:"frontend/components/Gatekeeper.tsx:26",message:"Gatekeeper mounted and stylesheet snapshot",data:{pathname:window.location.pathname,styleSheetCount:styleSheets.length,styleSheetHrefs,hasMainElement:Boolean(mainEl)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
+    if (mainEl) {
+      const computed = window.getComputedStyle(mainEl);
+      // #region agent log
+      fetch("http://127.0.0.1:7613/ingest/52c74c4f-229c-4906-8eec-ed86f8bcaaad",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"57db8f"},body:JSON.stringify({sessionId:"57db8f",runId:"pre-fix",hypothesisId:"H2",location:"frontend/components/Gatekeeper.tsx:31",message:"Computed styles for gatekeeper root",data:{className:mainEl.className,backgroundColor:computed.backgroundColor,color:computed.color,fontFamily:computed.fontFamily},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    }
+  }, []);
 
   const requestPermission = useCallback(async () => {
     setPermissionState("requesting");
@@ -29,7 +54,10 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   }, [onComplete]);
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100 sm:px-6 lg:px-8">
+    <main
+      id="gatekeeper-root"
+      className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100 sm:px-6 lg:px-8"
+    >
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-3xl items-center justify-center">
         <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-10">
           {permissionState === "denied" ? (
