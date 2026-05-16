@@ -375,6 +375,11 @@ export default function StudioPage() {
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.85)]" />
             LIVE
           </div>
+          {detectionError ? (
+            <div className="absolute right-5 top-5 rounded-full border border-red-300/70 bg-white/85 px-3 py-1.5 text-[11px] font-medium tracking-[0.04em] text-red-600 backdrop-blur-xl">
+              {detectionError}
+            </div>
+          ) : null}
 
           <div className="absolute bottom-0 left-1/2 w-[min(96%,980px)] -translate-x-1/2 overflow-hidden rounded-t-2xl border border-emerald-300/45 bg-white/70 px-4 pb-3 pt-2.5 backdrop-blur-2xl sm:px-6 sm:pb-4 sm:pt-3">
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-100/95 via-emerald-100/80 to-transparent" />
