@@ -60,11 +60,11 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   }
 
   return (
-    <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-4 text-emerald-950 sm:px-6 lg:h-[100dvh] lg:overflow-hidden">
+    <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-2 text-emerald-950 sm:px-6 lg:h-[100dvh] lg:overflow-hidden lg:py-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_38%,rgba(16,185,129,0.18),transparent_45%),radial-gradient(circle_at_72%_42%,rgba(132,204,22,0.16),transparent_38%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(236,253,245,0.85),transparent_60%)]" />
 
-      <section className="relative mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col items-center justify-center py-5 text-center sm:py-8 lg:h-full lg:min-h-0">
+      <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-start pt-2 text-center lg:h-full lg:min-h-0 lg:justify-center lg:pt-0">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-[10px] font-medium tracking-[0.13em] text-emerald-700 shadow-[0_0_18px_rgba(16,185,129,0.16)] transition hover:border-emerald-300 hover:shadow-[0_0_26px_rgba(16,185,129,0.22)] sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.14em]">
           <Sparkles className="h-3 w-3 text-lime-600 sm:h-3.5 sm:w-3.5" aria-hidden="true" />
           AI POWERED SIGN DETECTION
