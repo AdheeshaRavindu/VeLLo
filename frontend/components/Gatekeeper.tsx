@@ -1,7 +1,17 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { AlertCircle, Camera, Lock, Mic } from "lucide-react";
+import {
+  ArrowRight,
+  AudioLines,
+  Camera,
+  CheckCircle2,
+  Hand,
+  Lock,
+  Mic,
+  ChevronDown,
+  Sparkles,
+} from "lucide-react";
 
 type PermissionState = "idle" | "requesting" | "denied";
 
@@ -28,86 +38,170 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
     onComplete?.();
   }, [onComplete]);
 
-  return (
-    <main className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100 sm:px-6 lg:px-8">
-      <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-3xl items-center justify-center">
-        <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-10">
-          {permissionState === "denied" ? (
-            <div className="space-y-7 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10 text-red-400">
-                <AlertCircle className="h-6 w-6" aria-hidden="true" />
-              </div>
-
-              <div className="space-y-3">
-                <h1 className="text-3xl font-bold tracking-tight text-red-400 sm:text-4xl">
-                  We can&apos;t see you! 🙈
-                </h1>
-                <p className="mx-auto max-w-xl text-sm leading-relaxed text-zinc-300 sm:text-base">
-                  It looks like your camera is blocked. Click the lock icon in
-                  your browser&apos;s address bar to allow access, then refresh the
-                  page.
-                </p>
-              </div>
-
-              <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-zinc-700 bg-zinc-800/60 px-4 py-2 text-xs text-zinc-400">
-                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Enable camera and microphone permissions in browser settings.</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="inline-flex h-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 px-6 text-sm font-semibold text-zinc-100 transition hover:border-zinc-500 hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
-              >
-                Refresh Page
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-8 text-center">
-              <div className="space-y-4">
-                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
-                  Let&apos;s give your hands a voice.
-                </h1>
-                <p className="text-lg font-semibold text-zinc-300 sm:text-xl">
-                  Signs ටික real-time voice එකට හරවමු.
-                </p>
-                <p className="mx-auto max-w-2xl text-sm leading-relaxed text-zinc-400 sm:text-base">
-                  To translate your signs into spoken words, the system needs to
-                  see your movements. We don&apos;t record or store your video -
-                  everything processes live on your screen.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  disabled={permissionState === "requesting"}
-                  onClick={requestPermission}
-                  className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-6 text-base font-semibold text-zinc-100 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_0_40px_rgba(255,255,255,0.06)] transition hover:border-zinc-500 hover:bg-zinc-700 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800/50 disabled:text-zinc-400 sm:w-auto sm:min-w-[280px]"
-                >
-                  {permissionState === "requesting" ? (
-                    <>
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-100" />
-                      Waiting for permission...
-                    </>
-                  ) : (
-                    <>
-                      <Camera className="h-5 w-5" aria-hidden="true" />
-                      <Mic className="h-5 w-5" aria-hidden="true" />
-                      <span>📸 Enable Camera &amp; Mic</span>
-                    </>
-                  )}
-                </button>
-
-                <p className="text-xs text-zinc-500">
-                  A browser popup will appear next. Please click &quot;Allow&quot; to
-                  start.
-                </p>
-              </div>
-            </div>
-          )}
+  if (permissionState === "denied") {
+    return (
+      <main className="relative h-screen overflow-hidden bg-gradient-to-b from-[#090A10] via-[#090A10] to-[#07070c] px-4 py-4 text-zinc-100 sm:px-6">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.10),transparent_45%),radial-gradient(circle_at_70%_45%,rgba(139,92,246,0.10),transparent_40%)]" />
+        <div className="pointer-events-none absolute left-0 top-20 h-[70vh] w-36 opacity-35 [background-image:radial-gradient(circle,_rgba(59,130,246,0.35)_1.2px,_transparent_1.2px)] [background-size:14px_14px] [mask-image:linear-gradient(to_right,black,transparent)]" />
+        <div className="pointer-events-none absolute right-0 top-20 h-[70vh] w-36 opacity-35 [background-image:radial-gradient(circle,_rgba(139,92,246,0.35)_1.2px,_transparent_1.2px)] [background-size:14px_14px] [mask-image:linear-gradient(to_left,black,transparent)]" />
+        <div className="relative mx-auto flex h-full max-w-3xl items-center justify-center">
+          <div className="w-full rounded-3xl border border-red-400/25 bg-zinc-900/55 p-8 text-center shadow-[0_0_80px_rgba(239,68,68,0.12)] backdrop-blur-xl sm:p-10">
+            <h1 className="text-3xl font-bold tracking-tight text-red-400 sm:text-5xl">
+              We can&apos;t see you! 🙈
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-zinc-300 sm:text-base">
+              It looks like your camera is blocked. Click the lock icon in your
+              browser&apos;s address bar to allow access, then refresh the page.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-7 inline-flex h-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 px-6 text-sm font-semibold text-zinc-100 transition hover:border-zinc-500 hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
-      </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="relative h-screen overflow-hidden bg-gradient-to-b from-[#090A10] via-[#090A10] to-[#07070c] px-4 py-4 text-zinc-100 sm:px-6">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_42%),radial-gradient(circle_at_70%_45%,rgba(139,92,246,0.12),transparent_38%)]" />
+      <div className="pointer-events-none absolute left-0 top-20 h-[70vh] w-36 opacity-35 [background-image:radial-gradient(circle,_rgba(59,130,246,0.35)_1.2px,_transparent_1.2px)] [background-size:14px_14px] [mask-image:linear-gradient(to_right,black,transparent)]" />
+      <div className="pointer-events-none absolute right-0 top-20 h-[70vh] w-36 opacity-35 [background-image:radial-gradient(circle,_rgba(139,92,246,0.35)_1.2px,_transparent_1.2px)] [background-size:14px_14px] [mask-image:linear-gradient(to_left,black,transparent)]" />
+      <div className="pointer-events-none absolute left-8 top-1/3 hidden h-24 w-24 rounded-full border border-white/10 bg-zinc-900/40 backdrop-blur lg:block" />
+      <div className="pointer-events-none absolute right-8 top-1/2 hidden h-20 w-20 rounded-full border border-white/10 bg-zinc-900/40 backdrop-blur lg:block" />
+
+      <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col">
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-200 shadow-[0_0_24px_rgba(59,130,246,0.25)] backdrop-blur">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.9)]" />
+            SignVoice
+          </div>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-1.5 text-xs text-zinc-200 transition hover:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+            aria-label="Language selector"
+          >
+            English
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+
+        <section className="mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-4 py-2 text-[11px] font-medium tracking-[0.14em] text-zinc-300">
+            <Sparkles className="h-3.5 w-3.5 text-violet-300" aria-hidden="true" />
+            AI POWERED SIGN DETECTION
+          </span>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Let&apos;s give your{" "}
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">
+              hands a voice.
+            </span>
+          </h1>
+          <p className="mt-2 text-base font-semibold text-zinc-300 sm:text-lg">
+            Signs එක real-time voice එකට හරවමු.
+          </p>
+          <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-zinc-400 sm:text-sm">
+            To translate your signs into spoken words, the system needs to see your
+            movements. We don&apos;t record or store your video - everything
+            processes live on your screen.
+          </p>
+
+          <div className="mt-4 w-full rounded-[24px] border border-white/10 bg-zinc-900/45 p-4 shadow-[0_0_80px_rgba(59,130,246,0.14)] backdrop-blur-xl">
+            <div className="relative h-[220px] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 sm:h-[250px]">
+              <img
+                src="https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                alt="Person demonstrating a sign language hand gesture"
+                className="h-full w-full object-cover opacity-90"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090A10]/45 to-transparent" />
+              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-300">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                LIVE
+              </span>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 rounded-lg border border-white/10 bg-zinc-900/75 px-2.5 py-1.5 text-left text-xs text-zinc-200 backdrop-blur">
+                <span className="flex items-center gap-1.5">
+                  <AudioLines
+                    className={`h-3.5 w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
+                    aria-hidden="true"
+                  />
+                  Listening...
+                </span>
+              </div>
+              <div className="absolute bottom-3 right-3 rounded-lg border border-white/10 bg-zinc-900/75 px-3 py-1.5 text-center backdrop-blur">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-400">DETECTED SIGN</p>
+                <p className="bg-gradient-to-b from-blue-300 to-violet-300 bg-clip-text text-xl font-bold text-transparent">
+                  L
+                </p>
+              </div>
+              <div className="pointer-events-none absolute inset-7 rounded-xl border border-indigo-400/40 shadow-[0_0_26px_rgba(99,102,241,0.3)]" />
+              <div className="pointer-events-none absolute left-5 top-5 h-7 w-7 border-l-2 border-t-2 border-blue-400" />
+              <div className="pointer-events-none absolute right-5 top-5 h-7 w-7 border-r-2 border-t-2 border-violet-400" />
+              <div className="pointer-events-none absolute bottom-5 left-5 h-7 w-7 border-b-2 border-l-2 border-blue-400" />
+              <div className="pointer-events-none absolute bottom-5 right-5 h-7 w-7 border-b-2 border-r-2 border-violet-400" />
+            </div>
+          </div>
+
+          <div className="mt-4 w-full max-w-3xl">
+            <button
+              type="button"
+              disabled={permissionState === "requesting"}
+              onClick={requestPermission}
+              className="group w-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 p-[1px] shadow-[0_0_48px_rgba(79,70,229,0.48)] transition duration-200 hover:scale-[1.01] hover:shadow-[0_0_64px_rgba(99,102,241,0.62)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+            >
+              <span className="flex w-full items-center justify-between gap-3 rounded-full bg-zinc-950/75 px-4 py-3 text-left sm:px-6">
+                <span className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                    {permissionState === "requesting" ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white" />
+                    ) : (
+                      <Camera className="h-4.5 w-4.5" aria-hidden="true" />
+                    )}
+                  </span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                    <Mic className="h-4.5 w-4.5" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-white sm:text-base">
+                      {permissionState === "requesting"
+                        ? "Waiting for permission..."
+                        : "Enable Camera & Mic"}
+                    </span>
+                    <span className="block text-xs text-zinc-200/80">
+                      Click to get started
+                    </span>
+                  </span>
+                </span>
+                <ArrowRight className="h-5 w-5 text-white transition group-hover:translate-x-1" aria-hidden="true" />
+              </span>
+            </button>
+            <p className="mt-2 inline-flex items-center gap-2 text-xs text-zinc-400">
+              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+              A browser popup will appear next. Please click &quot;Allow&quot; to start.
+            </p>
+          </div>
+
+          <div className="mt-4 grid w-full max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2">
+            {[
+              "Real-time Detection",
+              "Instant Translation",
+              "Voice Output",
+              "100% Private",
+            ].map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-2 rounded-xl border border-zinc-800/80 bg-zinc-900/45 px-3 py-2 text-left text-xs text-zinc-300 backdrop-blur"
+              >
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-blue-300" aria-hidden="true" />
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
