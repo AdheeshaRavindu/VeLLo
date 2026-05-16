@@ -124,18 +124,81 @@ export default function StudioPage() {
     return `${hours}h ago`;
   };
 
+  const cameraHealth =
+    cameraStatus === "ready"
+      ? "active"
+      : cameraStatus === "loading"
+        ? "processing"
+        : "error";
+  const aiProcessingHealth =
+    cameraStatus === "denied"
+      ? "error"
+      : subtitleVisible
+        ? "active"
+        : "processing";
+  const audioReadyHealth =
+    cameraStatus === "denied"
+      ? "error"
+      : isSpeaking
+        ? "active"
+        : "processing";
+
+  const systemStatuses: Array<{
+    label: string;
+    detail: string;
+    state: "active" | "processing" | "error";
+  }> = [
+    {
+      label: "Webcam Active",
+      detail:
+        cameraStatus === "ready"
+          ? "Live feed connected"
+          : cameraStatus === "loading"
+            ? "Initializing camera..."
+            : "Permission denied",
+      state: cameraHealth,
+    },
+    {
+      label: "AI Processing",
+      detail:
+        cameraStatus === "denied"
+          ? "Unavailable"
+          : subtitleVisible
+            ? "Inference pipeline running"
+            : "Refreshing language model",
+      state: aiProcessingHealth,
+    },
+    {
+      label: "Audio Ready",
+      detail:
+        cameraStatus === "denied"
+          ? "Unavailable"
+          : isSpeaking
+            ? "ElevenLabs speaking"
+            : "Waiting for next phrase",
+      state: audioReadyHealth,
+    },
+  ];
+
+  const statusTone = (state: "active" | "processing" | "error") =>
+    state === "active"
+      ? "bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+      : state === "processing"
+        ? "bg-amber-300 shadow-[0_0_10px_rgba(252,211,77,0.9)]"
+        : "bg-red-300 shadow-[0_0_10px_rgba(252,165,165,0.9)]";
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#050814] via-[#070b18] to-[#050711] px-4 py-4 text-zinc-100 sm:px-6 lg:px-8">
+    <main className="h-[100dvh] overflow-hidden bg-gradient-to-b from-[#050814] via-[#070b18] to-[#050711] px-4 py-2 text-zinc-100 sm:px-6 lg:px-8 lg:py-3">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(59,130,246,0.16),transparent_40%),radial-gradient(circle_at_85%_15%,rgba(139,92,246,0.14),transparent_38%),radial-gradient(circle_at_30%_100%,rgba(16,185,129,0.08),transparent_45%)]" />
 
       <section
-        className={`relative mx-auto grid h-[calc(100dvh-2rem)] w-full max-w-[1500px] grid-cols-1 gap-4 transition-[grid-template-columns] duration-300 ${
+        className={`relative mx-auto grid h-full w-full max-w-[1500px] min-h-0 grid-cols-1 gap-3 transition-[grid-template-columns] duration-300 lg:gap-4 ${
           panelOpen
             ? "lg:grid-cols-[minmax(0,1fr)_320px]"
             : "lg:grid-cols-[minmax(0,1fr)_80px]"
         }`}
       >
-        <div className="relative overflow-hidden rounded-3xl border border-indigo-300/20 bg-zinc-900/40 shadow-[0_28px_70px_rgba(2,6,23,0.55),0_0_56px_rgba(79,70,229,0.22)] backdrop-blur-2xl">
+        <div className="relative min-h-0 overflow-hidden rounded-3xl border border-indigo-300/20 bg-zinc-900/40 shadow-[0_28px_70px_rgba(2,6,23,0.55),0_0_56px_rgba(79,70,229,0.22)] backdrop-blur-2xl">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0b1328]/85 via-[#0b1224]/88 to-[#070b16]/94" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(99,102,241,0.22),transparent_45%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_110%,rgba(2,6,23,0.8),transparent_58%)]" />
@@ -171,7 +234,7 @@ export default function StudioPage() {
             LIVE
           </div>
 
-          <div className="absolute bottom-0 left-1/2 w-[min(96%,980px)] -translate-x-1/2 overflow-hidden rounded-t-2xl border border-white/10 bg-zinc-900/70 px-4 pb-4 pt-3 backdrop-blur-2xl sm:px-6 sm:pb-5 sm:pt-4">
+          <div className="absolute bottom-0 left-1/2 w-[min(96%,980px)] -translate-x-1/2 overflow-hidden rounded-t-2xl border border-white/10 bg-zinc-900/70 px-4 pb-3 pt-2.5 backdrop-blur-2xl sm:px-6 sm:pb-4 sm:pt-3">
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-900/95 via-zinc-900/80 to-transparent" />
             <div
               className={`relative transform-gpu transition-all duration-300 ${subtitleVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}
@@ -180,11 +243,11 @@ export default function StudioPage() {
                 <Captions className="h-3.5 w-3.5 text-indigo-300" aria-hidden="true" />
                 {subtitleFrames[subtitleIndex].gloss}
               </div>
-              <p className="text-center text-xl font-bold leading-tight text-white antialiased sm:text-3xl">
+              <p className="text-center text-lg font-bold leading-tight text-white antialiased sm:text-2xl lg:text-[1.65rem]">
                 {subtitleFrames[subtitleIndex].translation}
               </p>
 
-              <div className="mt-2 flex items-center justify-center gap-2 text-[10px] tracking-[0.14em] text-zinc-300/80 sm:text-xs">
+              <div className="mt-1.5 flex items-center justify-center gap-2 text-[10px] tracking-[0.14em] text-zinc-300/80 sm:text-xs">
                 <span
                   className={`inline-flex h-2 w-2 rounded-full transition-all duration-300 ${isSpeaking ? "bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]" : "bg-zinc-500/60"}`}
                 />
@@ -203,7 +266,7 @@ export default function StudioPage() {
           </div>
         </div>
 
-        <aside className="hidden rounded-3xl border border-white/10 bg-zinc-900/45 p-3 shadow-[0_0_42px_rgba(99,102,241,0.18)] backdrop-blur-2xl lg:block">
+        <aside className="hidden h-full min-h-0 rounded-3xl border border-white/10 bg-zinc-900/45 p-2.5 shadow-[0_0_42px_rgba(99,102,241,0.18)] backdrop-blur-2xl lg:flex lg:flex-col">
           <div className="mb-3 flex items-center justify-between">
             {panelOpen ? (
               <h2 className="text-sm font-semibold tracking-[0.14em] text-zinc-300">
@@ -227,23 +290,23 @@ export default function StudioPage() {
           </div>
 
           {panelOpen ? (
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+            <div className="min-h-0 flex-1 space-y-2.5 overflow-hidden">
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-2.5">
                 <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
                   <History className="h-4 w-4 text-blue-300" />
                   Session History
                 </div>
-                <div className="space-y-2">
+                <div className="max-h-[28vh] space-y-1.5 overflow-y-auto pr-1">
                   {sessionHistory.slice(0, 5).map((item, index) => (
                     <article
                       key={`${item.timestamp}-${index}`}
-                      className="rounded-xl border border-white/10 bg-zinc-900/55 p-2"
+                      className="rounded-xl border border-white/10 bg-zinc-900/55 p-1.5"
                     >
-                      <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      <p className="text-[9px] uppercase tracking-[0.11em] text-zinc-400">
                         {item.gloss}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-100">{item.translation}</p>
-                      <p className="mt-1 text-[10px] text-zinc-500">
+                      <p className="mt-0.5 text-[11px] text-zinc-100">{item.translation}</p>
+                      <p className="mt-0.5 text-[9px] text-zinc-500">
                         {formatRelativeTime(item.timestamp)}
                       </p>
                     </article>
@@ -251,27 +314,40 @@ export default function StudioPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-2.5">
                 <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
                   <BookText className="h-4 w-4 text-violet-300" />
                   Phrase Guide
                 </div>
-                <div className="space-y-1.5 text-xs text-zinc-400">
+                <div className="space-y-1 text-[11px] text-zinc-400">
                   <p>Hello, nice to meet you</p>
                   <p>What is your name?</p>
                   <p>Please repeat slowly</p>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-3">
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/55 p-2.5">
                 <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-zinc-300">
                   <Activity className="h-4 w-4 text-emerald-300" />
                   System Status
                 </div>
-                <div className="space-y-1.5 text-xs text-zinc-400">
-                  <p>Camera: Stable</p>
-                  <p>Recognition: Active</p>
-                  <p>Voice Output: Online</p>
+                <div className="space-y-1.5">
+                  {systemStatuses.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-xl border border-white/10 bg-zinc-900/55 px-2 py-1.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium text-zinc-200">{item.label}</p>
+                          <p className="text-[10px] text-zinc-400">{item.detail}</p>
+                        </div>
+                        <span
+                          className={`inline-flex h-2 w-2 shrink-0 rounded-full transition-all duration-300 ${statusTone(item.state)} ${item.state === "processing" ? "animate-pulse" : ""}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -371,10 +447,23 @@ export default function StudioPage() {
               <Activity className="h-4 w-4 text-emerald-300" />
               System Status
             </div>
-            <div className="space-y-1.5 text-xs text-zinc-400">
-              <p>Camera: Stable</p>
-              <p>Recognition: Active</p>
-              <p>Voice Output: Online</p>
+            <div className="space-y-2">
+              {systemStatuses.map((item) => (
+                <div
+                  key={`mobile-${item.label}`}
+                  className="rounded-xl border border-white/10 bg-zinc-900/55 px-2.5 py-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-zinc-200">{item.label}</p>
+                      <p className="text-[11px] text-zinc-400">{item.detail}</p>
+                    </div>
+                    <span
+                      className={`inline-flex h-2.5 w-2.5 shrink-0 rounded-full transition-all duration-300 ${statusTone(item.state)} ${item.state === "processing" ? "animate-pulse" : ""}`}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
