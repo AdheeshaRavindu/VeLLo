@@ -19,6 +19,7 @@ export default function StudioPage() {
   const [subtitleVisible, setSubtitleVisible] = useState(true);
   const [subtitleIndex, setSubtitleIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(true);
+  const [phrasePulse, setPhrasePulse] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const touchStartY = useRef<number | null>(null);
@@ -83,6 +84,12 @@ export default function StudioPage() {
     return () => window.clearTimeout(timer);
   }, [subtitleIndex, isSpeaking]);
 
+  useEffect(() => {
+    setPhrasePulse(true);
+    const timer = window.setTimeout(() => setPhrasePulse(false), 700);
+    return () => window.clearTimeout(timer);
+  }, [subtitleIndex]);
+
   const cameraHealth =
     cameraStatus === "ready"
       ? "active"
@@ -129,6 +136,9 @@ export default function StudioPage() {
     },
   ] as const;
   const currentFrame = subtitleFrames[subtitleIndex];
+  const recognizedPhrase = currentFrame.translation.replace(/[.?!]/g, "").toUpperCase();
+  const confidenceText =
+    cameraStatus === "ready" ? "96%" : cameraStatus === "loading" ? "78%" : "0%";
   const liveTranslationStream = [0, 1, 2].map((offset) => {
     const index = (subtitleIndex - offset + subtitleFrames.length) % subtitleFrames.length;
     const frame = subtitleFrames[index];
@@ -283,22 +293,21 @@ export default function StudioPage() {
                 <article className="rounded-2xl border border-emerald-300/40 bg-white/78 p-3 shadow-[0_0_16px_rgba(16,185,129,0.14)] backdrop-blur-xl">
                   <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
                     <Languages className="h-3.5 w-3.5 text-lime-600" />
-                    Recognized Phrase Card
+                    Recognized Phrase
                   </div>
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-emerald-800/75">Detected gloss</p>
-                  <p className="mt-1 text-[11px] font-medium text-emerald-950">{currentFrame.gloss}</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[10px] text-emerald-800/75">Recognition confidence</span>
-                    <span className="text-[10px] font-semibold text-emerald-900">
-                      {cameraStatus === "ready" ? "97.4%" : cameraStatus === "loading" ? "syncing..." : "offline"}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-emerald-200/80">
-                    <span
-                      className={`block h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-lime-500 transition-all duration-500 ${
-                        cameraStatus === "ready" ? "w-[97%]" : cameraStatus === "loading" ? "w-[42%]" : "w-[12%]"
-                      }`}
-                    />
+                  <div className="flex min-h-[170px] flex-col items-center justify-center rounded-xl border border-emerald-300/45 bg-white/85 px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
+                    <p
+                      className={`max-w-[15ch] text-balance text-2xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-950 transition-all duration-300 sm:text-[1.7rem] ${
+                        subtitleVisible
+                          ? "opacity-100 shadow-[0_0_16px_rgba(16,185,129,0.22)]"
+                          : "opacity-55"
+                      } ${phrasePulse ? "animate-pulse" : ""}`}
+                    >
+                      {recognizedPhrase}
+                    </p>
+                    <p className="mt-4 text-[11px] text-emerald-800/70">
+                      Confidence: <span className="font-semibold text-emerald-900">{confidenceText}</span>
+                    </p>
                   </div>
                 </article>
 
@@ -410,22 +419,21 @@ export default function StudioPage() {
             <article className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
               <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
                 <Languages className="h-3.5 w-3.5 text-lime-600" />
-                Recognized Phrase Card
+                Recognized Phrase
               </div>
-              <p className="text-[10px] uppercase tracking-[0.12em] text-emerald-800/75">Detected gloss</p>
-              <p className="mt-1 text-xs font-medium text-emerald-950">{currentFrame.gloss}</p>
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-[10px] text-emerald-800/75">Recognition confidence</span>
-                <span className="text-[10px] font-semibold text-emerald-900">
-                  {cameraStatus === "ready" ? "97.4%" : cameraStatus === "loading" ? "syncing..." : "offline"}
-                </span>
-              </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-emerald-200/80">
-                <span
-                  className={`block h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-lime-500 transition-all duration-500 ${
-                    cameraStatus === "ready" ? "w-[97%]" : cameraStatus === "loading" ? "w-[42%]" : "w-[12%]"
-                  }`}
-                />
+              <div className="flex min-h-[150px] flex-col items-center justify-center rounded-xl border border-emerald-300/45 bg-white/85 px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
+                <p
+                  className={`max-w-[15ch] text-balance text-xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-950 transition-all duration-300 ${
+                    subtitleVisible
+                      ? "opacity-100 shadow-[0_0_14px_rgba(16,185,129,0.2)]"
+                      : "opacity-55"
+                  } ${phrasePulse ? "animate-pulse" : ""}`}
+                >
+                  {recognizedPhrase}
+                </p>
+                <p className="mt-3 text-[11px] text-emerald-800/70">
+                  Confidence: <span className="font-semibold text-emerald-900">{confidenceText}</span>
+                </p>
               </div>
             </article>
 
