@@ -2,7 +2,7 @@ import type { Intent } from "@/types";
 
 const DEMO_INTENTS: Intent[] = [
   "yes",
-  "help",
+  "no",
 ];
 
 interface DemoButtonsProps {

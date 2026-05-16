@@ -1,11 +1,11 @@
 SUPPORTED_INTENTS: list[str] = [
     "yes",
-    "help",
+    "no",
 ]
 
 INTENT_THRESHOLDS: dict[str, float] = {
     "yes": 0.72,
-    "help": 0.90,
+    "no": 0.72,
 }
 
 CLASSIFIER_MODE: str = "rule"
