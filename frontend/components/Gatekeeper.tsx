@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, AudioLines, Camera, Lock, Mic, Sparkles } from "lucide-react";
+import { ArrowRight, AudioLines, Lock, Sparkles } from "lucide-react";
 
 type PermissionState = "idle" | "requesting" | "denied";
 
@@ -66,24 +66,20 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
 
       <section className="relative mx-auto flex w-full max-w-2xl flex-col items-center justify-start pt-2 text-center lg:min-h-[100dvh] lg:justify-center lg:pt-5 lg:pb-5">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-[10px] font-medium tracking-[0.13em] text-emerald-700 shadow-[0_0_18px_rgba(16,185,129,0.16)] transition hover:border-emerald-300 hover:shadow-[0_0_26px_rgba(16,185,129,0.22)] sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.14em]">
-          <Sparkles className="h-3 w-3 text-lime-600 sm:h-3.5 sm:w-3.5" aria-hidden="true" />
+          
           AI POWERED SIGN DETECTION
         </span>
 
         <h1
-          className={`mt-3 max-w-4xl text-3xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-4 sm:text-4xl lg:text-5xl lg:leading-tight ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
+          className={`mt-3  w-max text-3xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-2 sm:mb-1 sm:text-4xl lg:text-5xl lg:leading-tight ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
         >
-          Let&apos;s give your{" "}
+          LET&apos;S GIVE YOUR{" "}
           <span className="bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-clip-text text-transparent">
-            hands a voice.
+            HANDS A VOICE
           </span>
         </h1>
 
-        <p
-          className={`mt-2 text-sm font-semibold tracking-wide text-emerald-800/85 sm:mt-3 sm:text-base lg:text-lg ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:120ms]`}
-        >
-          Signs into real-time voice translation.
-        </p>
+        
 
         <p
           className={`mx-auto mt-2 max-w-[330px] px-1 text-xs leading-relaxed text-emerald-800/75 sm:mt-3 sm:max-w-2xl sm:px-0 sm:text-sm lg:mt-2 lg:max-w-xl lg:leading-relaxed ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:220ms]`}
@@ -135,20 +131,10 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             type="button"
             disabled={permissionState === "requesting"}
             onClick={requestPermission}
-            className="group w-full rounded-full bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-[length:200%_100%] [background-position:0%_50%] p-[1.5px] shadow-[0_0_36px_rgba(16,185,129,0.32)] transition-[transform,box-shadow,background-position] duration-300 ease-out active:scale-[0.995] hover:scale-[1.01] hover:[background-position:100%_50%] hover:shadow-[0_0_54px_rgba(16,185,129,0.45)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-          >
+            className="group w-full max-w-[360px] rounded-full bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-[length:200%_100%] [background-position:0%_50%] p-[1.5px] shadow-[0_0_36px_rgba(16,185,129,0.32)] transition-[transform,box-shadow,background-position] duration-300 ease-out active:scale-[0.995] hover:scale-[1.01] hover:[background-position:100%_50%] hover:shadow-[0_0_54px_rgba(16,185,129,0.45)] disabled:cursor-not-allowed disabled:opacity-70 lg:mb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            >
             <span className="flex w-full items-center justify-between gap-2 rounded-full border border-emerald-200/70 bg-white/65 px-4 py-3 text-left backdrop-blur-xl sm:gap-3 sm:px-7 sm:py-3.5 lg:py-2.5">
               <span className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500/10 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.2)] sm:h-10 sm:w-10">
-                  {permissionState === "requesting" ? (
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white" />
-                  ) : (
-                    <Camera className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                  )}
-                </span>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-lime-200/80 bg-lime-500/10 text-lime-700 shadow-[0_0_12px_rgba(132,204,22,0.2)] sm:h-10 sm:w-10">
-                  <Mic className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                </span>
                 <span>
                   <span className="block text-sm font-semibold text-emerald-900 sm:text-base lg:text-base">
                     {permissionState === "requesting"
