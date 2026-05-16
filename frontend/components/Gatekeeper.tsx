@@ -93,19 +93,20 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
           live on your screen.
         </p>
 
-        <div className="mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_18px_42px_rgba(6,95,70,0.18),0_0_42px_rgba(16,185,129,0.14)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-4">
-          <div className="relative h-[180px] overflow-hidden rounded-[24px] border border-emerald-300/45 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[250px] sm:rounded-[28px] lg:h-[320px]">
+        <div className="mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-4">
+          <div className="relative h-[240px] overflow-hidden rounded-[24px] border border-emerald-300/50 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[320px] sm:rounded-[28px] lg:h-[420px]">
             <img
               src="/models/woman-sign.png"
               alt="Woman demonstrating a sign language hand gesture"
-              className="h-full w-full scale-[1.42] object-contain object-center opacity-95 sm:scale-[1.34] lg:scale-[1.24]"
+              className="h-full w-full translate-y-2 scale-[1.56] object-contain object-[50%_58%] opacity-95 sm:translate-y-1 sm:scale-[1.46] lg:translate-y-0 lg:scale-[1.36]"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/30 via-emerald-900/5 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(16,185,129,0.18),transparent_45%)]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/42 via-emerald-900/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_36%,rgba(16,185,129,0.28),transparent_42%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(6,78,59,0.26),transparent_24%,transparent_76%,rgba(6,78,59,0.26))]" />
 
             
 
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/72 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_14px_rgba(16,185,129,0.16)] backdrop-blur-xl sm:left-4 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
+            <div className="absolute left-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/68 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.14)] backdrop-blur-xl sm:left-[20%] sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
               <span className="flex items-center gap-1 sm:gap-1.5">
                 <AudioLines
                   className={`h-3 w-3 text-emerald-600 sm:h-3.5 sm:w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
@@ -115,7 +116,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               </span>
             </div>
 
-            <div className="absolute bottom-2 right-2 rounded-lg border border-lime-300/60 bg-white/72 px-2.5 py-1.5 text-center shadow-[0_0_16px_rgba(132,204,22,0.16)] backdrop-blur-xl sm:bottom-auto sm:right-4 sm:top-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:px-3.5 sm:py-2">
+            <div className="absolute right-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-lime-300/60 bg-white/68 px-2.5 py-1.5 text-center shadow-[0_0_14px_rgba(132,204,22,0.14)] backdrop-blur-xl sm:right-[20%] sm:rounded-xl sm:px-3.5 sm:py-2">
               <p className="text-[8px] tracking-[0.14em] text-emerald-700 sm:text-[9px] sm:tracking-[0.16em]">DETECTED SIGN</p>
               <p className="bg-gradient-to-b from-emerald-600 to-lime-600 bg-clip-text text-xl font-bold leading-none text-transparent animate-pulse sm:text-2xl">
                 L
@@ -123,13 +124,13 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               <p className="mt-0.5 text-[8px] tracking-[0.14em] text-emerald-600/80 sm:text-[9px] sm:tracking-[0.16em]">LETTER</p>
             </div>
 
-            <div className="pointer-events-none absolute inset-[20%_30%] rounded-xl border border-emerald-400/45 shadow-[0_0_20px_rgba(16,185,129,0.24)] sm:inset-[18%_28%] sm:rounded-2xl" />
-            <div className="pointer-events-none absolute inset-[20%_30%] rounded-xl border border-emerald-100/70 sm:inset-[18%_28%] sm:rounded-2xl" />
+            <div className="pointer-events-none absolute inset-[13%_32%_10%_32%] rounded-xl border border-emerald-400/45 shadow-[0_0_22px_rgba(16,185,129,0.26)] sm:inset-[12%_31.5%_10%_31.5%] sm:rounded-2xl" />
+            <div className="pointer-events-none absolute inset-[13%_32%_10%_32%] rounded-xl border border-emerald-100/70 sm:inset-[12%_31.5%_10%_31.5%] sm:rounded-2xl" />
 
-            <div className="pointer-events-none absolute left-3 top-3 h-6 w-6 border-l-2 border-t-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:left-6 sm:top-6 sm:h-9 sm:w-9" />
-            <div className="pointer-events-none absolute right-3 top-3 h-6 w-6 border-r-2 border-t-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:right-6 sm:top-6 sm:h-9 sm:w-9" />
-            <div className="pointer-events-none absolute bottom-3 left-3 h-6 w-6 border-b-2 border-l-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:bottom-6 sm:left-6 sm:h-9 sm:w-9" />
-            <div className="pointer-events-none absolute bottom-3 right-3 h-6 w-6 border-b-2 border-r-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:bottom-6 sm:right-6 sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute left-[31%] top-[17%] h-6 w-6 border-l-2 border-t-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:left-[31.5%] sm:top-[15%] sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute right-[31%] top-[17%] h-6 w-6 border-r-2 border-t-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:right-[31.5%] sm:top-[15%] sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute bottom-[16%] left-[31%] h-6 w-6 border-b-2 border-l-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:bottom-[14%] sm:left-[31.5%] sm:h-9 sm:w-9" />
+            <div className="pointer-events-none absolute bottom-[16%] right-[31%] h-6 w-6 border-b-2 border-r-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:bottom-[14%] sm:right-[31.5%] sm:h-9 sm:w-9" />
           </div>
         </div>
 
