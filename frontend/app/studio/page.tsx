@@ -20,6 +20,9 @@ export default function StudioPage() {
   const [subtitleIndex, setSubtitleIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(true);
   const [phrasePulse, setPhrasePulse] = useState(false);
+  const [translationFeed, setTranslationFeed] = useState<
+    Array<{ id: number; gloss: string; translation: string; timestamp: number }>
+  >([]);
   const [panelOpen, setPanelOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const touchStartY = useRef<number | null>(null);
@@ -90,6 +93,21 @@ export default function StudioPage() {
     return () => window.clearTimeout(timer);
   }, [subtitleIndex]);
 
+  useEffect(() => {
+    const frame = subtitleFrames[subtitleIndex];
+    setTranslationFeed((prev) =>
+      [
+        {
+          id: Date.now(),
+          gloss: frame.gloss,
+          translation: frame.translation,
+          timestamp: Date.now(),
+        },
+        ...prev,
+      ].slice(0, 5),
+    );
+  }, [subtitleIndex, subtitleFrames]);
+
   const cameraHealth =
     cameraStatus === "ready"
       ? "active"
@@ -139,15 +157,16 @@ export default function StudioPage() {
   const recognizedPhrase = currentFrame.translation.replace(/[.?!]/g, "").toUpperCase();
   const confidenceText =
     cameraStatus === "ready" ? "96%" : cameraStatus === "loading" ? "78%" : "0%";
-  const liveTranslationStream = [0, 1, 2].map((offset) => {
-    const index = (subtitleIndex - offset + subtitleFrames.length) % subtitleFrames.length;
-    const frame = subtitleFrames[index];
-    return {
-      id: `${index}-${offset}`,
-      phase: offset === 0 ? "now" : offset === 1 ? "just now" : "earlier",
-      translation: frame.translation,
-    };
-  });
+  const liveTranslationStream = translationFeed.slice(0, 5);
+  const formatRelativeTime = (timestamp: number) => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 1) return "just now";
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
 
   const statusTone = (state: "active" | "processing" | "error" | "standby") =>
     state === "active"
@@ -311,21 +330,32 @@ export default function StudioPage() {
                   </div>
                 </article>
 
-                <article className="min-h-0 flex-1 rounded-2xl border border-emerald-300/40 bg-white/78 p-3 shadow-[0_0_16px_rgba(16,185,129,0.14)] backdrop-blur-xl">
-                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
-                    <Volume2 className="h-3.5 w-3.5 text-emerald-600" />
+                <article className="min-h-0 flex flex-1 flex-col rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
+                    <Volume2 className="h-3.5 w-3.5 text-emerald-300" />
                     Live Translation Stream
                   </div>
-                  <div className="space-y-1.5">
-                    {liveTranslationStream.map((item) => (
+                  <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
+                    {liveTranslationStream.map((item, index) => (
                       <div
                         key={item.id}
-                        className={`rounded-xl border border-emerald-300/40 px-2.5 py-1.5 ${
-                          item.phase === "now" ? "bg-emerald-100/90" : "bg-white/82"
+                        className={`rounded-xl border border-emerald-400/25 bg-emerald-900/55 px-2.5 py-1.5 transition-all duration-300 ${
+                          index === 0
+                            ? "translate-y-0 opacity-100"
+                            : index === 1
+                              ? "translate-y-0.5 opacity-90"
+                              : index === 2
+                                ? "translate-y-1 opacity-80"
+                                : "translate-y-1 opacity-70"
                         }`}
                       >
-                        <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-800/75">{item.phase}</p>
-                        <p className="mt-0.5 text-[11px] text-emerald-950">{item.translation}</p>
+                        <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-100/65">
+                          {item.gloss}
+                        </p>
+                        <p className="mt-0.5 text-[11px] font-semibold text-white">{item.translation}</p>
+                        <p className="mt-0.5 text-[9px] text-emerald-200/55">
+                          {formatRelativeTime(item.timestamp)}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -437,21 +467,30 @@ export default function StudioPage() {
               </div>
             </article>
 
-            <article className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
-              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
-                <Volume2 className="h-3.5 w-3.5 text-emerald-600" />
+            <article className="rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
+                <Volume2 className="h-3.5 w-3.5 text-emerald-300" />
                 Live Translation Stream
               </div>
-              <div className="space-y-1.5">
-                {liveTranslationStream.map((item) => (
+              <div className="max-h-[28vh] space-y-1.5 overflow-y-auto pr-0.5">
+                {liveTranslationStream.map((item, index) => (
                   <div
                     key={`mobile-stream-${item.id}`}
-                    className={`rounded-xl border border-emerald-300/40 px-2.5 py-1.5 ${
-                      item.phase === "now" ? "bg-emerald-100/90" : "bg-white/85"
+                    className={`rounded-xl border border-emerald-400/25 bg-emerald-900/55 px-2.5 py-1.5 transition-all duration-300 ${
+                      index === 0
+                        ? "translate-y-0 opacity-100"
+                        : index === 1
+                          ? "translate-y-0.5 opacity-90"
+                          : index === 2
+                            ? "translate-y-1 opacity-80"
+                            : "translate-y-1 opacity-70"
                     }`}
                   >
-                    <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-800/75">{item.phase}</p>
-                    <p className="mt-0.5 text-xs text-emerald-950">{item.translation}</p>
+                    <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-100/65">{item.gloss}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-white">{item.translation}</p>
+                    <p className="mt-0.5 text-[9px] text-emerald-200/55">
+                      {formatRelativeTime(item.timestamp)}
+                    </p>
                   </div>
                 ))}
               </div>
