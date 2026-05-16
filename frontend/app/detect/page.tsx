@@ -31,15 +31,17 @@ export default function DetectPage() {
     void triggerDemoIntent(intent);
   };
 
-  const shouldDisplayOutput =
-    Boolean(detection?.phrase) && (detection?.confidence ?? 0) >= MIN_OUTPUT_CONFIDENCE;
-  const outputPhrase = shouldDisplayOutput ? detection?.phrase ?? null : null;
+  const confidence = detection?.confidence ?? 0;
+  const hasDisplayConfidence = confidence >= MIN_OUTPUT_CONFIDENCE;
+  const outputPhrase = hasDisplayConfidence
+    ? detection?.phrase ?? detection?.intent ?? null
+    : null;
   let outputSuppressionReason: OutputSuppressionReason = null;
-  if (detection && !shouldDisplayOutput) {
-    if (!detection.phrase) {
-      outputSuppressionReason = "no_phrase_from_backend";
-    } else if (detection.confidence < MIN_OUTPUT_CONFIDENCE) {
+  if (detection && !outputPhrase) {
+    if (confidence < MIN_OUTPUT_CONFIDENCE) {
       outputSuppressionReason = "confidence_below_display_gate";
+    } else {
+      outputSuppressionReason = "no_phrase_from_backend";
     }
   }
 
@@ -103,7 +105,7 @@ export default function DetectPage() {
           />
           <PhraseCard
             phrase={outputPhrase}
-            confidence={detection?.confidence ?? 0}
+            confidence={confidence}
             displayThreshold={MIN_OUTPUT_CONFIDENCE}
             suppressionReason={outputSuppressionReason}
           />
