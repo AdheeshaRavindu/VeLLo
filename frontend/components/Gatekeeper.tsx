@@ -128,38 +128,46 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             recorded or stored - everything runs live and securely on your screen.
           </p>
 
-          <div className="mt-4 w-full rounded-[24px] border border-white/10 bg-zinc-900/45 p-4 shadow-[0_0_80px_rgba(59,130,246,0.14)] backdrop-blur-xl">
-            <div className="relative h-[220px] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 sm:h-[250px]">
+          <div className="mt-4 w-full rounded-[32px] border border-white/10 bg-zinc-900/40 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45),0_0_60px_rgba(79,70,229,0.2)] backdrop-blur-2xl">
+            <div className="relative h-[220px] overflow-hidden rounded-[28px] border border-indigo-300/20 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 sm:h-[250px]">
               <img
                 src="https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1200"
                 alt="Person demonstrating a sign language hand gesture"
-                className="h-full w-full object-cover opacity-90"
+                className="h-full w-full object-cover object-center opacity-92"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090A10]/45 to-transparent" />
-              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-300">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090A10]/55 via-[#090A10]/10 to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(99,102,241,0.18),transparent_45%)]" />
+
+              <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-medium tracking-[0.08em] text-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.3)]">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
                 LIVE
               </span>
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 rounded-lg border border-white/10 bg-zinc-900/75 px-2.5 py-1.5 text-left text-xs text-zinc-200 backdrop-blur">
+
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 rounded-xl border border-white/15 bg-zinc-900/70 px-3 py-2 text-left text-xs text-zinc-200 shadow-[0_0_20px_rgba(99,102,241,0.22)] backdrop-blur-xl">
                 <span className="flex items-center gap-1.5">
                   <AudioLines
-                    className={`h-3.5 w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
+                    className={`h-3.5 w-3.5 text-blue-300 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
                     aria-hidden="true"
                   />
                   Listening...
                 </span>
               </div>
-              <div className="absolute bottom-3 right-3 rounded-lg border border-white/10 bg-zinc-900/75 px-3 py-1.5 text-center backdrop-blur">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-400">DETECTED SIGN</p>
-                <p className="bg-gradient-to-b from-blue-300 to-violet-300 bg-clip-text text-xl font-bold text-transparent">
+
+              <div className="absolute bottom-4 right-4 rounded-xl border border-white/15 bg-zinc-900/70 px-3.5 py-2 text-center shadow-[0_0_22px_rgba(139,92,246,0.2)] backdrop-blur-xl sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2">
+                <p className="text-[9px] tracking-[0.16em] text-zinc-400">DETECTED SIGN</p>
+                <p className="bg-gradient-to-b from-blue-300 to-violet-300 bg-clip-text text-2xl font-bold leading-none text-transparent">
                   L
                 </p>
+                <p className="mt-0.5 text-[9px] tracking-[0.16em] text-zinc-500">LETTER</p>
               </div>
-              <div className="pointer-events-none absolute inset-7 rounded-xl border border-indigo-400/40 shadow-[0_0_26px_rgba(99,102,241,0.3)]" />
-              <div className="pointer-events-none absolute left-5 top-5 h-7 w-7 border-l-2 border-t-2 border-blue-400" />
-              <div className="pointer-events-none absolute right-5 top-5 h-7 w-7 border-r-2 border-t-2 border-violet-400" />
-              <div className="pointer-events-none absolute bottom-5 left-5 h-7 w-7 border-b-2 border-l-2 border-blue-400" />
-              <div className="pointer-events-none absolute bottom-5 right-5 h-7 w-7 border-b-2 border-r-2 border-violet-400" />
+
+              <div className="pointer-events-none absolute inset-[18%_28%] rounded-2xl border border-indigo-300/35 shadow-[0_0_26px_rgba(99,102,241,0.34)]" />
+              <div className="pointer-events-none absolute inset-[18%_28%] rounded-2xl border border-white/5" />
+
+              <div className="pointer-events-none absolute left-6 top-6 h-9 w-9 border-l-2 border-t-2 border-blue-400/95 shadow-[0_0_10px_rgba(59,130,246,0.65)]" />
+              <div className="pointer-events-none absolute right-6 top-6 h-9 w-9 border-r-2 border-t-2 border-violet-400/95 shadow-[0_0_10px_rgba(139,92,246,0.65)]" />
+              <div className="pointer-events-none absolute bottom-6 left-6 h-9 w-9 border-b-2 border-l-2 border-blue-400/95 shadow-[0_0_10px_rgba(59,130,246,0.65)]" />
+              <div className="pointer-events-none absolute bottom-6 right-6 h-9 w-9 border-b-2 border-r-2 border-violet-400/95 shadow-[0_0_10px_rgba(139,92,246,0.65)]" />
             </div>
           </div>
 
