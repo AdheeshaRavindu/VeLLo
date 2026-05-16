@@ -10,16 +10,6 @@ from app.services.training_data_service import append_training_sample
 from app.utils.constants import INTENT_THRESHOLDS, SUPPORTED_INTENTS
 
 router = APIRouter(prefix="/api", tags=["detect"])
-INTENT_ALIASES: dict[str, str] = {
-    "help": "i_need_help",
-    "emergency": "i_need_help",
-}
-
-
-def _normalize_intent(intent: str | None) -> str | None:
-    if intent is None:
-        return None
-    return INTENT_ALIASES.get(intent, intent)
 
 
 @router.post("/detect", response_model=DetectionResponse)
@@ -94,7 +84,7 @@ def detect_sign(payload: DetectRequest) -> DetectionResponse:
         raw_intent = gesture_result.intent
         raw_confidence = gesture_result.confidence
         asl_yes_debug = gesture_result.debug
-        intent = _normalize_intent(raw_intent)
+        intent = raw_intent
         confidence = raw_confidence
 
         if intent and intent in SUPPORTED_INTENTS:
