@@ -256,6 +256,24 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               ))}
             </div>
           </div>
+
+          <div className="mt-3 w-full max-w-3xl text-center">
+            <div className="mx-auto flex max-w-sm items-center gap-3">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-400/35 to-transparent" />
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-blue-400/30 bg-blue-500/10 text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.35)]">
+                <Hand className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-violet-400/35 to-transparent" />
+            </div>
+
+            <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-200">
+              <ShieldCheck className="h-4 w-4 text-blue-300" aria-hidden="true" />
+              100% Private &amp; Secure
+            </p>
+            <p className="mx-auto mt-1 max-w-lg text-xs leading-relaxed text-zinc-400">
+              Your privacy is our priority. We don&apos;t record or store any data.
+            </p>
+          </div>
         </section>
       </div>
     </main>
