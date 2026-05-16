@@ -1,14 +1,5 @@
 export type Intent =
-  | "help"
-  | "water"
-  | "doctor"
-  | "medicine"
-  | "emergency"
-  | "pain"
-  | "yes"
-  | "no"
-  | "stop"
-  | "thank_you";
+  | "yes";
 
 export type CameraPermission = "idle" | "requesting" | "granted" | "denied" | "error";
 
@@ -23,6 +14,13 @@ export interface DetectionResponse {
   intent: Intent | null;
   phrase: string | null;
   source: "vision" | "demo";
+  raw_intent?: string | null;
+  raw_confidence?: number | null;
+  accepted_intent?: string | null;
+  acceptance_threshold?: number | null;
+  accepted_phrase_available?: boolean | null;
+  suppression_reason?: string | null;
+  asl_yes_debug?: Record<string, number | boolean> | null;
   error?: string | null;
 }
 

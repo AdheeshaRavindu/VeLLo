@@ -26,3 +26,16 @@
   - predicted intent/confidence
   - raw landmarks
 
+## Active Label Workflow
+- Current active label set is defined in `backend/app/utils/constants.py` via `SUPPORTED_INTENTS`.
+- During stabilization, the app runs in single-sign mode with only `yes`.
+- Model label mapping contract is in `backend/app/services/model_classifier_service.py` (`MODEL_LABELS` and `model_index_to_intent`).
+
+## Add-Next-Sign Checklist
+1. Add the new intent string to `SUPPORTED_INTENTS`.
+2. Add or tune threshold in `INTENT_THRESHOLDS`.
+3. Add phrase entry in `shared/hospital_phrases.json`.
+4. Update frontend `Intent` union and demo list.
+5. Retrain/update model label mapping to match the new ordered label set.
+6. Validate `/api/detect` live detection and `capture_label` writes.
+
