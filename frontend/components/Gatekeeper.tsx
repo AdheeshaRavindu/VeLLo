@@ -64,7 +64,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_38%,rgba(16,185,129,0.18),transparent_45%),radial-gradient(circle_at_72%_42%,rgba(132,204,22,0.16),transparent_38%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(236,253,245,0.85),transparent_60%)]" />
 
-      <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-start pt-2 text-center lg:min-h-[100dvh] lg:justify-center lg:pt-0">
+      <section className="relative mx-auto flex w-full max-w-2xl flex-col items-center justify-start pt-2 text-center lg:min-h-[100dvh] lg:justify-center lg:pt-5 lg:pb-5">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-[10px] font-medium tracking-[0.13em] text-emerald-700 shadow-[0_0_18px_rgba(16,185,129,0.16)] transition hover:border-emerald-300 hover:shadow-[0_0_26px_rgba(16,185,129,0.22)] sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.14em]">
           <Sparkles className="h-3 w-3 text-lime-600 sm:h-3.5 sm:w-3.5" aria-hidden="true" />
           AI POWERED SIGN DETECTION
@@ -93,12 +93,12 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
           live on your screen.
         </p>
 
-        <div className="mx-auto mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-4 lg:mt-3">
+        <div className="mx-auto mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-2   lg:mt-5 lg:mb-5">
           <div className="relative h-[240px] overflow-hidden rounded-[24px] border border-emerald-300/50 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[320px] sm:rounded-[28px] lg:h-[330px]">
             <img
               src="/models/woman-sign.png"
               alt="Woman demonstrating a sign language hand gesture"
-              className="h-full w-full translate-y-2 scale-[1.56] object-contain object-[50%_58%] opacity-95 sm:translate-y-1 sm:scale-[1.46] lg:translate-y-0 lg:scale-[1.36]"
+              className="h-full w-full translate-y-1 scale-[1.34] object-contain object-[50%_56%] opacity-100 sm:scale-[1.28] lg:translate-y-10 lg:-translate-x-5 lg:scale-[1.18]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/42 via-emerald-900/10 to-transparent" />
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_36%,rgba(16,185,129,0.28),transparent_42%)]" />
@@ -106,7 +106,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
 
             
 
-            <div className="absolute left-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/68 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.14)] backdrop-blur-xl sm:left-[20%] sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
+            <div className="absolute -translate-x-20 left-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/68 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.14)] backdrop-blur-xl sm:left-[20%] sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
               <span className="flex items-center gap-1 sm:gap-1.5">
                 <AudioLines
                   className={`h-3 w-3 text-emerald-600 sm:h-3.5 sm:w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
@@ -116,7 +116,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               </span>
             </div>
 
-            <div className="absolute right-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-lime-300/60 bg-white/68 px-2.5 py-1.5 text-center shadow-[0_0_14px_rgba(132,204,22,0.14)] backdrop-blur-xl sm:right-[20%] sm:rounded-xl sm:px-3.5 sm:py-2">
+            <div className="absolute right-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-lime-300/60 bg-white/68 px-2.5 py-1.5 text-center shadow-[0_0_14px_rgba(132,204,22,0.14)] backdrop-blur-xl sm:right-[6%] sm:rounded-xl sm:px-3.5 sm:py-2">
               <p className="text-[8px] tracking-[0.14em] text-emerald-700 sm:text-[9px] sm:tracking-[0.16em]">DETECTED SIGN</p>
               <p className="bg-gradient-to-b from-emerald-600 to-lime-600 bg-clip-text text-xl font-bold leading-none text-transparent animate-pulse sm:text-2xl">
                 L
@@ -124,13 +124,9 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               <p className="mt-0.5 text-[8px] tracking-[0.14em] text-emerald-600/80 sm:text-[9px] sm:tracking-[0.16em]">LETTER</p>
             </div>
 
-            <div className="pointer-events-none absolute inset-[13%_32%_10%_32%] rounded-xl border border-emerald-400/45 shadow-[0_0_22px_rgba(16,185,129,0.26)] sm:inset-[12%_31.5%_10%_31.5%] sm:rounded-2xl" />
-            <div className="pointer-events-none absolute inset-[13%_32%_10%_32%] rounded-xl border border-emerald-100/70 sm:inset-[12%_31.5%_10%_31.5%] sm:rounded-2xl" />
+            <div className="pointer-events-none absolute inset-[13%_30%_10%_30%] rounded-xl border border-emerald-400/45 shadow-[0_0_22px_rgba(16,185,129,0.26)] sm:inset-[12%_29.5%_10%_29.5%] sm:rounded-2xl" />
+            <div className="pointer-events-none absolute inset-[13%_30%_10%_30%] rounded-xl border border-emerald-100/70 sm:inset-[12%_29.5%_10%_29.5%] sm:rounded-2xl" />
 
-            <div className="pointer-events-none absolute left-[31%] top-[17%] h-6 w-6 border-l-2 border-t-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:left-[31.5%] sm:top-[15%] sm:h-9 sm:w-9" />
-            <div className="pointer-events-none absolute right-[31%] top-[17%] h-6 w-6 border-r-2 border-t-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:right-[31.5%] sm:top-[15%] sm:h-9 sm:w-9" />
-            <div className="pointer-events-none absolute bottom-[16%] left-[31%] h-6 w-6 border-b-2 border-l-2 border-emerald-500/95 shadow-[0_0_8px_rgba(16,185,129,0.55)] sm:bottom-[14%] sm:left-[31.5%] sm:h-9 sm:w-9" />
-            <div className="pointer-events-none absolute bottom-[16%] right-[31%] h-6 w-6 border-b-2 border-r-2 border-lime-500/95 shadow-[0_0_8px_rgba(132,204,22,0.55)] sm:bottom-[14%] sm:right-[31.5%] sm:h-9 sm:w-9" />
           </div>
         </div>
 
