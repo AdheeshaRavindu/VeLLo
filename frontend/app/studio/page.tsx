@@ -51,7 +51,9 @@ export default function StudioPage() {
   const intentToGloss = useCallback((intent: Intent | null) => {
     if (intent === "yes") return "[YES]";
     if (intent === "no") return "[NO]";
-    if (intent === "i_need_help") return "[I] [NEED] [HELP]";
+    if (intent === "water") return "[WATER]";
+    if (intent === "pain") return "[PAIN]";
+    if (intent === "stop") return "[STOP]";
     return "[UNRECOGNIZED]";
   }, []);
 

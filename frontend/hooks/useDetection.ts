@@ -6,6 +6,7 @@ import type { TrackingSnapshot } from "@/hooks/useCamera";
 
 const POLL_INTERVAL_MS = 250;
 const LIVE_STABILITY_FRAMES = 2;
+const HANDS_FREE_RESET_MS = 500;
 
 interface UseDetectionProps {
   getTrackingSnapshot: () => TrackingSnapshot;
@@ -27,6 +28,8 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
   const stableIntentRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
   const inFlightRef = useRef(false);
+  const gestureLockedRef = useRef(false);
+  const handsFreeSinceRef = useRef<number | null>(null);
 
   const runDetection = useCallback(
     async (intent: Intent | null = null) => {
@@ -35,7 +38,49 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
       }
 
       const snapshot = getTrackingSnapshot();
-      if (!snapshot.landmarks && !intent) {
+      const handsPresent = Boolean(snapshot.landmarks && snapshot.landmarks.length > 0);
+
+      if (!intent && gestureLockedRef.current) {
+        if (!handsPresent) {
+          const now = Date.now();
+          if (handsFreeSinceRef.current === null) {
+            handsFreeSinceRef.current = now;
+          }
+          if (now - handsFreeSinceRef.current >= HANDS_FREE_RESET_MS) {
+            gestureLockedRef.current = false;
+            handsFreeSinceRef.current = null;
+            stableIntentRef.current = null;
+            stableCountRef.current = 0;
+            setDetection((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    hand_detected: false,
+                    intent: null,
+                    phrase: null,
+                  }
+                : prev,
+            );
+          }
+        } else {
+          handsFreeSinceRef.current = null;
+        }
+        return;
+      }
+
+      if (!handsPresent && !intent) {
+        stableIntentRef.current = null;
+        stableCountRef.current = 0;
+        setDetection((prev) =>
+          prev
+            ? {
+                ...prev,
+                hand_detected: false,
+                intent: null,
+                phrase: null,
+              }
+            : prev,
+        );
         return;
       }
 
@@ -69,6 +114,10 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
             setDetection({ ...result, intent: null, phrase: null });
           } else {
             setDetection(result);
+            if (result.intent) {
+              gestureLockedRef.current = true;
+              handsFreeSinceRef.current = null;
+            }
           }
         } else {
           setDetection(result);
