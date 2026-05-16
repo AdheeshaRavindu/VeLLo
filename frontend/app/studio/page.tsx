@@ -2,14 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  Activity,
-  BookText,
   Captions,
   ChevronLeft,
   ChevronRight,
-  History,
   Languages,
-  Mic,
   Sparkles,
   Video,
   Volume2,
@@ -26,20 +22,6 @@ export default function StudioPage() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const touchStartY = useRef<number | null>(null);
-  const [sessionHistory, setSessionHistory] = useState<
-    Array<{ gloss: string; translation: string; timestamp: number }>
-  >([
-    {
-      gloss: "[HELLO] [NICE] [MEET]",
-      translation: "Hello, nice to meet you.",
-      timestamp: Date.now() - 145000,
-    },
-    {
-      gloss: "[PLEASE] [REPEAT] [SLOW]",
-      translation: "Please repeat that slowly.",
-      timestamp: Date.now() - 92000,
-    },
-  ]);
 
   const subtitleFrames = [
     { gloss: "[YOU] [NAME] [WHAT]", translation: "What is your name?" },
@@ -86,20 +68,7 @@ export default function StudioPage() {
       setSubtitleVisible(false);
       setIsSpeaking(false);
       window.setTimeout(() => {
-        setSubtitleIndex((prev) => {
-          const next = (prev + 1) % subtitleFrames.length;
-          setSessionHistory((history) =>
-            [
-              {
-                gloss: subtitleFrames[next].gloss,
-                translation: subtitleFrames[next].translation,
-                timestamp: Date.now(),
-              },
-              ...history,
-            ].slice(0, 5),
-          );
-          return next;
-        });
+        setSubtitleIndex((prev) => (prev + 1) % subtitleFrames.length);
         setSubtitleVisible(true);
         setIsSpeaking(true);
       }, 220);
@@ -113,16 +82,6 @@ export default function StudioPage() {
     const timer = window.setTimeout(() => setIsSpeaking(false), 2600);
     return () => window.clearTimeout(timer);
   }, [subtitleIndex, isSpeaking]);
-
-  const formatRelativeTime = (timestamp: number) => {
-    const seconds = Math.floor((Date.now() - timestamp) / 1000);
-    if (seconds < 5) return "just now";
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    return `${hours}h ago`;
-  };
 
   const cameraHealth =
     cameraStatus === "ready"
@@ -143,49 +102,51 @@ export default function StudioPage() {
         ? "active"
         : "processing";
 
-  const systemStatuses: Array<{
-    label: string;
-    detail: string;
-    state: "active" | "processing" | "error";
-  }> = [
+  const detectionSignals = [
     {
       label: "Webcam Active",
-      detail:
-        cameraStatus === "ready"
-          ? "Live feed connected"
-          : cameraStatus === "loading"
-            ? "Initializing camera..."
-            : "Permission denied",
-      state: cameraHealth,
+      stateText:
+        cameraStatus === "ready" ? "ACTIVE" : cameraStatus === "loading" ? "STANDBY" : "DISCONNECTED",
+      tone: cameraStatus === "ready" ? "active" : cameraStatus === "loading" ? "standby" : "error",
+    },
+    {
+      label: "Hand Detected",
+      stateText:
+        cameraStatus === "denied" ? "DISCONNECTED" : subtitleVisible ? "DETECTING" : "STANDBY",
+      tone: cameraStatus === "denied" ? "error" : subtitleVisible ? "active" : "standby",
     },
     {
       label: "AI Processing",
-      detail:
-        cameraStatus === "denied"
-          ? "Unavailable"
-          : subtitleVisible
-            ? "Inference pipeline running"
-            : "Refreshing language model",
-      state: aiProcessingHealth,
+      stateText:
+        cameraStatus === "denied" ? "DISCONNECTED" : subtitleVisible ? "PROCESSING" : "STANDBY",
+      tone: cameraStatus === "denied" ? "error" : subtitleVisible ? "processing" : "standby",
     },
     {
-      label: "Audio Ready",
-      detail:
-        cameraStatus === "denied"
-          ? "Unavailable"
-          : isSpeaking
-            ? "ElevenLabs speaking"
-            : "Waiting for next phrase",
-      state: audioReadyHealth,
+      label: "Voice Output Ready",
+      stateText:
+        cameraStatus === "denied" ? "DISCONNECTED" : isSpeaking ? "SPEAKING" : "STANDBY",
+      tone: cameraStatus === "denied" ? "error" : isSpeaking ? "active" : "standby",
     },
-  ];
+  ] as const;
+  const currentFrame = subtitleFrames[subtitleIndex];
+  const liveTranslationStream = [0, 1, 2].map((offset) => {
+    const index = (subtitleIndex - offset + subtitleFrames.length) % subtitleFrames.length;
+    const frame = subtitleFrames[index];
+    return {
+      id: `${index}-${offset}`,
+      phase: offset === 0 ? "now" : offset === 1 ? "just now" : "earlier",
+      translation: frame.translation,
+    };
+  });
 
-  const statusTone = (state: "active" | "processing" | "error") =>
+  const statusTone = (state: "active" | "processing" | "error" | "standby") =>
     state === "active"
       ? "bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
       : state === "processing"
         ? "bg-amber-300 shadow-[0_0_10px_rgba(252,211,77,0.9)]"
-        : "bg-red-300 shadow-[0_0_10px_rgba(252,165,165,0.9)]";
+        : state === "standby"
+          ? "bg-sky-300 shadow-[0_0_10px_rgba(125,211,252,0.85)]"
+          : "bg-red-300 shadow-[0_0_10px_rgba(252,165,165,0.9)]";
 
   return (
     <main className="h-[100dvh] overflow-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-2 text-emerald-950 sm:px-6 lg:px-8 lg:py-3">
@@ -290,70 +251,81 @@ export default function StudioPage() {
           </div>
 
           {panelOpen ? (
-            <div className="min-h-0 flex-1 space-y-2.5 overflow-hidden">
-              <div className="rounded-2xl border border-emerald-300/40 bg-white/75 p-2.5">
-                <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-emerald-900">
-                  <History className="h-4 w-4 text-emerald-600" />
-                  Session History
-                </div>
-                <div className="max-h-[28vh] space-y-1.5 overflow-y-auto pr-1">
-                  {sessionHistory.slice(0, 5).map((item, index) => (
-                    <article
-                      key={`${item.timestamp}-${index}`}
-                      className="rounded-xl border border-emerald-300/40 bg-white/80 p-1.5"
-                    >
-                      <p className="text-[9px] uppercase tracking-[0.11em] text-emerald-800/80">
-                        {item.gloss}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-emerald-950">{item.translation}</p>
-                      <p className="mt-0.5 text-[9px] text-emerald-800/65">
-                        {formatRelativeTime(item.timestamp)}
-                      </p>
-                    </article>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-300/40 bg-white/75 p-2.5">
-                <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-emerald-900">
-                  <BookText className="h-4 w-4 text-lime-600" />
-                  Phrase Guide
-                </div>
-                <div className="space-y-1 text-[11px] text-emerald-800/80">
-                  <p>Hello, nice to meet you</p>
-                  <p>What is your name?</p>
-                  <p>Please repeat slowly</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-300/40 bg-white/75 p-2.5">
-                <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-emerald-900">
-                  <Activity className="h-4 w-4 text-emerald-300" />
-                  System Status
-                </div>
-                <div className="space-y-1.5">
-                  {systemStatuses.map((item) => (
-                    <div
-                      key={item.label}
-                      className="rounded-xl border border-emerald-300/40 bg-white/80 px-2 py-1.5"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-medium text-emerald-900">{item.label}</p>
-                          <p className="text-[10px] text-emerald-800/75">{item.detail}</p>
-                        </div>
-                        <span
-                          className={`inline-flex h-2 w-2 shrink-0 rounded-full transition-all duration-300 ${statusTone(item.state)} ${item.state === "processing" ? "animate-pulse" : ""}`}
-                        />
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <div className="flex h-full flex-col space-y-2.5">
+                <article className="rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
+                    <Video className="h-3.5 w-3.5 text-emerald-300" />
+                    Detection Status
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {detectionSignals.map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between rounded-xl border border-emerald-400/25 bg-emerald-900/55 px-2.5 py-1.5"
+                      >
+                        <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.08em] text-emerald-100">
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${statusTone(item.tone)} ${
+                              item.tone === "active" || item.tone === "processing" ? "animate-pulse" : ""
+                            }`}
+                          />
+                          {item.label}
+                        </span>
+                        <span className="text-[10px] font-medium tracking-[0.08em] text-emerald-200/85">
+                          {item.stateText}
+                        </span>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </article>
+
+                <article className="rounded-2xl border border-emerald-300/40 bg-white/78 p-3 shadow-[0_0_16px_rgba(16,185,129,0.14)] backdrop-blur-xl">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
+                    <Languages className="h-3.5 w-3.5 text-lime-600" />
+                    Recognized Phrase Card
+                  </div>
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-emerald-800/75">Detected gloss</p>
+                  <p className="mt-1 text-[11px] font-medium text-emerald-950">{currentFrame.gloss}</p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[10px] text-emerald-800/75">Recognition confidence</span>
+                    <span className="text-[10px] font-semibold text-emerald-900">
+                      {cameraStatus === "ready" ? "97.4%" : cameraStatus === "loading" ? "syncing..." : "offline"}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-emerald-200/80">
+                    <span
+                      className={`block h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-lime-500 transition-all duration-500 ${
+                        cameraStatus === "ready" ? "w-[97%]" : cameraStatus === "loading" ? "w-[42%]" : "w-[12%]"
+                      }`}
+                    />
+                  </div>
+                </article>
+
+                <article className="min-h-0 flex-1 rounded-2xl border border-emerald-300/40 bg-white/78 p-3 shadow-[0_0_16px_rgba(16,185,129,0.14)] backdrop-blur-xl">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
+                    <Volume2 className="h-3.5 w-3.5 text-emerald-600" />
+                    Live Translation Stream
+                  </div>
+                  <div className="space-y-1.5">
+                    {liveTranslationStream.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`rounded-xl border border-emerald-300/40 px-2.5 py-1.5 ${
+                          item.phase === "now" ? "bg-emerald-100/90" : "bg-white/82"
+                        }`}
+                      >
+                        <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-800/75">{item.phase}</p>
+                        <p className="mt-0.5 text-[11px] text-emerald-950">{item.translation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
               </div>
             </div>
           ) : (
             <div className="flex h-[calc(100%-44px)] flex-col items-center justify-start gap-3 pt-3">
-              {[<History key="h" className="h-4 w-4" />, <BookText key="b" className="h-4 w-4" />, <Activity key="a" className="h-4 w-4" />].map(
+              {[<Video key="v" className="h-4 w-4" />, <Languages key="l" className="h-4 w-4" />, <Volume2 key="a" className="h-4 w-4" />].map(
                 (icon, index) => (
                   <span
                     key={index}
@@ -406,65 +378,76 @@ export default function StudioPage() {
             CLOSE
           </button>
         </div>
-        <div className="space-y-3 overflow-y-auto pb-2">
-          <div className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
-            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-emerald-900">
-              <History className="h-4 w-4 text-emerald-600" />
-              Session History
-            </div>
-            <div className="space-y-2">
-              {sessionHistory.slice(0, 5).map((item, index) => (
-                <article
-                  key={`${item.timestamp}-mobile-${index}`}
-                  className="rounded-xl border border-emerald-300/40 bg-white/85 p-2"
-                >
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-emerald-800/80">
-                    {item.gloss}
-                  </p>
-                  <p className="mt-1 text-xs text-emerald-950">{item.translation}</p>
-                  <p className="mt-1 text-[10px] text-emerald-800/65">
-                    {formatRelativeTime(item.timestamp)}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
-            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-emerald-900">
-              <BookText className="h-4 w-4 text-lime-600" />
-              Phrase Guide
-            </div>
-            <div className="space-y-1.5 text-xs text-emerald-800/80">
-              <p>Hello, nice to meet you</p>
-              <p>What is your name?</p>
-              <p>Please repeat slowly</p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
-            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.08em] text-emerald-900">
-              <Activity className="h-4 w-4 text-emerald-300" />
-              System Status
-            </div>
-            <div className="space-y-2">
-              {systemStatuses.map((item) => (
-                <div
-                  key={`mobile-${item.label}`}
-                  className="rounded-xl border border-emerald-300/40 bg-white/85 px-2.5 py-2"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-emerald-900">{item.label}</p>
-                      <p className="text-[11px] text-emerald-800/75">{item.detail}</p>
-                    </div>
-                    <span
-                      className={`inline-flex h-2.5 w-2.5 shrink-0 rounded-full transition-all duration-300 ${statusTone(item.state)} ${item.state === "processing" ? "animate-pulse" : ""}`}
-                    />
+        <div className="overflow-y-auto pb-2">
+          <div className="space-y-2.5">
+            <article className="rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
+                <Video className="h-3.5 w-3.5 text-emerald-300" />
+                Detection Status
+              </div>
+              <div className="grid grid-cols-1 gap-1.5">
+                {detectionSignals.map((item) => (
+                  <div
+                    key={`mobile-status-${item.label}`}
+                    className="flex items-center justify-between rounded-xl border border-emerald-400/25 bg-emerald-900/55 px-2.5 py-1.5"
+                  >
+                    <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.08em] text-emerald-100">
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${statusTone(item.tone)} ${
+                          item.tone === "active" || item.tone === "processing" ? "animate-pulse" : ""
+                        }`}
+                      />
+                      {item.label}
+                    </span>
+                    <span className="text-[10px] font-medium tracking-[0.08em] text-emerald-200/85">
+                      {item.stateText}
+                    </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
+                <Languages className="h-3.5 w-3.5 text-lime-600" />
+                Recognized Phrase Card
+              </div>
+              <p className="text-[10px] uppercase tracking-[0.12em] text-emerald-800/75">Detected gloss</p>
+              <p className="mt-1 text-xs font-medium text-emerald-950">{currentFrame.gloss}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[10px] text-emerald-800/75">Recognition confidence</span>
+                <span className="text-[10px] font-semibold text-emerald-900">
+                  {cameraStatus === "ready" ? "97.4%" : cameraStatus === "loading" ? "syncing..." : "offline"}
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-emerald-200/80">
+                <span
+                  className={`block h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-lime-500 transition-all duration-500 ${
+                    cameraStatus === "ready" ? "w-[97%]" : cameraStatus === "loading" ? "w-[42%]" : "w-[12%]"
+                  }`}
+                />
+              </div>
+            </article>
+
+            <article className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
+                <Volume2 className="h-3.5 w-3.5 text-emerald-600" />
+                Live Translation Stream
+              </div>
+              <div className="space-y-1.5">
+                {liveTranslationStream.map((item) => (
+                  <div
+                    key={`mobile-stream-${item.id}`}
+                    className={`rounded-xl border border-emerald-300/40 px-2.5 py-1.5 ${
+                      item.phase === "now" ? "bg-emerald-100/90" : "bg-white/85"
+                    }`}
+                  >
+                    <p className="text-[9px] uppercase tracking-[0.12em] text-emerald-800/75">{item.phase}</p>
+                    <p className="mt-0.5 text-xs text-emerald-950">{item.translation}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
           </div>
         </div>
       </aside>
