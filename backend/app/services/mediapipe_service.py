@@ -11,6 +11,8 @@ class HandDetectionResult:
     hand_detected: bool
     confidence: float
     landmarks: list[list[float]]
+    handedness: str | None = None
+    handedness_score: float = 0.0
     error: str | None = None
 
 
@@ -43,19 +45,40 @@ class MediaPipeService:
                 hand_detected=False,
                 confidence=0.0,
                 landmarks=[],
+                handedness=None,
+                handedness_score=0.0,
                 error="Unable to decode frame",
             )
 
         frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         results = self._hands.process(frame_rgb)
         if not results.multi_hand_landmarks:
-            return HandDetectionResult(hand_detected=False, confidence=0.0, landmarks=[])
+            return HandDetectionResult(
+                hand_detected=False,
+                confidence=0.0,
+                landmarks=[],
+                handedness=None,
+                handedness_score=0.0,
+            )
 
         landmarks: list[list[float]] = []
         for point in results.multi_hand_landmarks[0].landmark:
             landmarks.append([float(point.x), float(point.y), float(point.z)])
 
-        return HandDetectionResult(hand_detected=True, confidence=0.9, landmarks=landmarks)
+        handedness_label: str | None = None
+        handedness_score = 0.0
+        if results.multi_handedness:
+            classification = results.multi_handedness[0].classification[0]
+            handedness_label = str(classification.label)
+            handedness_score = float(classification.score)
+
+        return HandDetectionResult(
+            hand_detected=True,
+            confidence=max(0.7, handedness_score),
+            landmarks=landmarks,
+            handedness=handedness_label,
+            handedness_score=handedness_score,
+        )
 
 
 mediapipe_service = MediaPipeService()

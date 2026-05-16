@@ -5,8 +5,8 @@ import { detectSign } from "@/services/api";
 import type { DetectionResponse, Intent } from "@/types";
 
 const POLL_INTERVAL_MS = 250;
-const MAX_FRAME_WIDTH = 640;
-const JPEG_QUALITY = 0.65;
+const MAX_FRAME_WIDTH = 800;
+const JPEG_QUALITY = 0.75;
 
 interface UseDetectionProps {
   videoRef: RefObject<HTMLVideoElement>;
