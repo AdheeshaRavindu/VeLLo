@@ -1,1 +1,43 @@
+{
+  "asl_open_palm": {
+    "description": "ASL-inspired open palm",
+    "intent": "help"
+  },
+  "asl_thumb_up": {
+    "description": "ASL-inspired thumb up",
+    "intent": "water"
+  },
+  "asl_index_up": {
+    "description": "ASL-inspired index finger up",
+    "intent": "doctor"
+  },
+  "asl_index_middle_up": {
+    "description": "ASL-inspired index and middle up",
+    "intent": "medicine"
+  },
+  "asl_open_palm_spread": {
+    "description": "ASL-inspired open palm with wide finger spread",
+    "intent": "emergency"
+  },
+  "asl_fist": {
+    "description": "ASL-inspired closed fist",
+    "intent": "pain"
+  },
+  "asl_thumb_index_pinch": {
+    "description": "ASL-inspired thumb-index pinch",
+    "intent": "yes"
+  },
+  "asl_index_pinky_up": {
+    "description": "ASL-inspired index and pinky up",
+    "intent": "no"
+  },
+  "asl_stop_palm_no_thumb": {
+    "description": "ASL-inspired stop hand (four fingers up, thumb tucked)",
+    "intent": "stop"
+  },
+  "asl_thumb_index_middle_up": {
+    "description": "ASL-inspired thumb, index and middle up",
+    "intent": "thank_you"
+  }
+}
 

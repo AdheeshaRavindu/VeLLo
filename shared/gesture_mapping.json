@@ -1,1 +1,13 @@
+{
+  "help": "asl_open_palm",
+  "water": "asl_thumb_up",
+  "doctor": "asl_index_up",
+  "medicine": "asl_index_middle_up",
+  "emergency": "asl_open_palm_spread",
+  "pain": "asl_fist",
+  "yes": "asl_thumb_index_pinch",
+  "no": "asl_index_pinky_up",
+  "stop": "asl_stop_palm_no_thumb",
+  "thank_you": "asl_thumb_index_middle_up"
+}
 
