@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, AudioLines, Lock, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type PermissionState = "idle" | "requesting" | "denied";
 
@@ -14,6 +15,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   const [permissionState, setPermissionState] = useState<PermissionState>("idle");
   const [heroVisible, setHeroVisible] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const timer = window.setTimeout(() => setHeroVisible(true), 80);
@@ -24,14 +26,10 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
     setPermissionState("requesting");
     await wait(1500);
 
-    if (Math.random() < 0.5) {
-      setPermissionState("denied");
-      return;
-    }
-
     setPermissionState("idle");
     onComplete?.();
-  }, [onComplete]);
+    router.push("/studio");
+  }, [onComplete, router]);
 
   if (permissionState === "denied") {
     return (
