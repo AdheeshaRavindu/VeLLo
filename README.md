@@ -56,3 +56,19 @@ docker compose build --no-cache
 docker compose up
 ```
 
+## Train Intent Model
+You can train the backend intent model from captured gesture data or a Kaggle export.
+
+1. Open backend folder and install requirements.
+2. Run training script:
+   ```powershell
+   python scripts/train_intent_model.py --input app/data/gesture_samples.jsonl --labels yes,no
+   ```
+3. For Kaggle ASL fingerspelling export, map letters to intents:
+   ```powershell
+   python scripts/train_intent_model.py --input "C:\path\to\kaggle_export.csv" --labels yes,no --map y=yes --map n=no
+   ```
+4. Run backend with model mode:
+   - `CLASSIFIER_MODE=model`
+   - `MODEL_FILE=app/data/models/gesture_centroid_model.json`
+

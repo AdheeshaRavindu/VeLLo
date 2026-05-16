@@ -51,13 +51,33 @@ def _thumb_extended(landmarks: list[list[float]], handedness: str | None) -> boo
     )
 
 
+def _finger_extended(landmarks: list[list[float]], tip_idx: int, pip_idx: int) -> bool:
+    tip = landmarks[tip_idx]
+    pip = landmarks[pip_idx]
+    wrist = landmarks[0]
+
+    # Primary check for upright poses.
+    y_based = tip[1] < pip[1]
+
+    # Secondary distance check improves robustness for rotated hands.
+    tip_wrist = _distance(tip, wrist)
+    pip_wrist = _distance(pip, wrist)
+    distance_based = tip_wrist > (pip_wrist * 1.06)
+    return y_based or distance_based
+
+
+def _is_compact_fist(landmarks: list[list[float]], palm_size: float) -> bool:
+    tip_distances = [_distance(landmarks[index], landmarks[0]) / palm_size for index in FINGER_TIPS]
+    return max(tip_distances) < 1.35
+
+
 def _raised_mask(landmarks: list[list[float]], handedness: str | None) -> list[bool]:
     mask: list[bool] = []
     mask.append(_thumb_extended(landmarks, handedness))
 
     # Other fingers: tip above PIP in image coordinates (lower y is higher in frame).
     for tip_idx, pip_idx in zip(FINGER_TIPS[1:], FINGER_PIPS[1:], strict=True):
-        mask.append(landmarks[tip_idx][1] < landmarks[pip_idx][1])
+        mask.append(_finger_extended(landmarks, tip_idx, pip_idx))
     return mask
 
 
@@ -131,7 +151,7 @@ def classify_gesture(
     spread_norm = _distance(landmarks[8], landmarks[20]) / palm
 
     conf_base = max(0.55, min(0.95, detector_confidence))
-    is_fist = raised_fingers == 0
+    is_fist = raised_fingers == 0 and _is_compact_fist(landmarks, palm)
     _record_yes_motion_sample(landmarks[0][1], is_fist)
     yes_motion_debug: dict[str, float | int | bool] | None = None
 
@@ -157,10 +177,11 @@ def classify_gesture(
     if raised_fingers == 4 and not thumb_up:
         return GestureResult(intent="stop", confidence=min(0.9, conf_base + 0.14))
 
-    if raised_fingers == 0:
+    if raised_fingers == 0 and is_fist:
+        # Fallback for static ASL "yes" (closed fist) when motion cue is weak.
         return GestureResult(
-            intent="pain",
-            confidence=min(0.9, conf_base + 0.12),
+            intent="yes",
+            confidence=min(0.86, conf_base + 0.04),
             debug=yes_motion_debug,
         )
 
@@ -173,8 +194,8 @@ def classify_gesture(
     if thumb_up and not index_up and not middle_up and not ring_up and not pinky_up:
         return GestureResult(intent="water", confidence=min(0.88, conf_base + 0.1))
 
-    if not thumb_up and index_up and not middle_up and not ring_up and pinky_up:
-        return GestureResult(intent="no", confidence=min(0.88, conf_base + 0.11))
+    if index_up and not middle_up and not ring_up and pinky_up:
+        return GestureResult(intent="no", confidence=min(0.92, conf_base + 0.12))
 
     if thumb_up and index_up and middle_up and not ring_up and not pinky_up:
         return GestureResult(intent="thank_you", confidence=min(0.88, conf_base + 0.1))
