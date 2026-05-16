@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
   AudioLines,
@@ -24,6 +24,12 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   const [permissionState, setPermissionState] = useState<PermissionState>("idle");
+  const [heroVisible, setHeroVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setHeroVisible(true), 80);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const requestPermission = useCallback(async () => {
     setPermissionState("requesting");
@@ -101,19 +107,25 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             <Sparkles className="h-3.5 w-3.5 text-violet-300" aria-hidden="true" />
             AI POWERED SIGN DETECTION
           </span>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1
+            className={`mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
+          >
             Let&apos;s give your{" "}
             <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">
               hands a voice.
             </span>
           </h1>
-          <p className="mt-2 text-base font-semibold text-zinc-300 sm:text-lg">
-            Signs එක real-time voice එකට හරවමු.
+          <p
+            className={`mt-3 text-sm font-semibold tracking-wide text-zinc-300 sm:text-base ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:120ms]`}
+          >
+            Signs into real-time voice translation.
           </p>
-          <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-zinc-400 sm:text-sm">
-            To translate your signs into spoken words, the system needs to see your
-            movements. We don&apos;t record or store your video - everything
-            processes live on your screen.
+          <p
+            className={`mx-auto mt-3 max-w-xl text-xs leading-relaxed text-zinc-400 sm:text-sm ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:220ms]`}
+          >
+            Experience real-time sign detection with instant spoken voice
+            conversion, built with privacy-first processing. Your video never gets
+            recorded or stored - everything runs live and securely on your screen.
           </p>
 
           <div className="mt-4 w-full rounded-[24px] border border-white/10 bg-zinc-900/45 p-4 shadow-[0_0_80px_rgba(59,130,246,0.14)] backdrop-blur-xl">
