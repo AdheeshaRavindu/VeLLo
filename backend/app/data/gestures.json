@@ -1,62 +1,42 @@
 {
-  "open_palm": {
-    "description": "Five fingers visible, open palm",
+  "asl_open_palm": {
+    "description": "ASL-inspired open palm",
     "intent": "help"
   },
-  "thumb_up": {
-    "description": "Only thumb raised",
+  "asl_thumb_up": {
+    "description": "ASL-inspired thumb up",
     "intent": "water"
   },
-  "index_up": {
-    "description": "Only index finger raised",
+  "asl_index_up": {
+    "description": "ASL-inspired index finger up",
     "intent": "doctor"
   },
-  "index_middle_up": {
-    "description": "Index and middle fingers raised",
+  "asl_index_middle_up": {
+    "description": "ASL-inspired index and middle up",
     "intent": "medicine"
   },
-  "index_middle_ring_up": {
-    "description": "Index, middle and ring fingers raised",
+  "asl_open_palm_spread": {
+    "description": "ASL-inspired open palm with wide finger spread",
     "intent": "emergency"
   },
-  "fist": {
-    "description": "All fingers folded",
+  "asl_fist": {
+    "description": "ASL-inspired closed fist",
     "intent": "pain"
   },
-  "thumb_index_up": {
-    "description": "Thumb and index raised",
-    "intent": "chest_pain"
-  },
-  "open_four_no_thumb": {
-    "description": "All fingers up except thumb",
-    "intent": "breathing_problem"
-  },
-  "middle_up": {
-    "description": "Only middle finger raised",
-    "intent": "dizzy"
-  },
-  "ring_up": {
-    "description": "Only ring finger raised",
-    "intent": "hungry"
-  },
-  "pinky_up": {
-    "description": "Only pinky finger raised",
-    "intent": "toilet"
-  },
-  "thumb_index_pinch": {
-    "description": "Thumb and index pinch",
+  "asl_thumb_index_pinch": {
+    "description": "ASL-inspired thumb-index pinch",
     "intent": "yes"
   },
-  "index_pinky_up": {
-    "description": "Index and pinky raised",
+  "asl_index_pinky_up": {
+    "description": "ASL-inspired index and pinky up",
     "intent": "no"
   },
-  "palm_no_thumb": {
-    "description": "Open palm without thumb",
+  "asl_stop_palm_no_thumb": {
+    "description": "ASL-inspired stop hand (four fingers up, thumb tucked)",
     "intent": "stop"
   },
-  "thumb_index_middle_up": {
-    "description": "Thumb, index and middle raised",
+  "asl_thumb_index_middle_up": {
+    "description": "ASL-inspired thumb, index and middle up",
     "intent": "thank_you"
   }
 }

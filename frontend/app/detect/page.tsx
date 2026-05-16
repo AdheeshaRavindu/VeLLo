@@ -38,6 +38,9 @@ export default function DetectPage() {
             <p className="mt-1 text-base text-slate-600">
               Keep your hand visible in camera or switch to demo mode.
             </p>
+            <p className="mt-1 text-sm font-medium text-sky-700">
+              ASL-inspired mode: 10 hospital intents
+            </p>
           </div>
           <div className="rounded-xl bg-slate-100 p-1">
             <button
