@@ -5,8 +5,8 @@ import { detectSign } from "@/services/api";
 import type { DetectionResponse, Intent } from "@/types";
 
 const POLL_INTERVAL_MS = 250;
-const MAX_FRAME_WIDTH = 800;
-const JPEG_QUALITY = 0.75;
+const MAX_FRAME_WIDTH = 960;
+const JPEG_QUALITY = 0.9;
 const LIVE_STABILITY_FRAMES = 1;
 
 interface UseDetectionProps {

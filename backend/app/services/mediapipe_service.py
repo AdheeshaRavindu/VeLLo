@@ -1,5 +1,7 @@
 import base64
 from dataclasses import dataclass
+from pathlib import Path
+import urllib.request
 
 import cv2
 import mediapipe as mp
@@ -13,18 +15,56 @@ class HandDetectionResult:
     landmarks: list[list[float]]
     handedness: str | None = None
     handedness_score: float = 0.0
+    secondary_landmarks: list[list[float]] | None = None
+    secondary_handedness: str | None = None
+    secondary_handedness_score: float = 0.0
     error: str | None = None
 
 
 class MediaPipeService:
+    _TASK_MODEL_URL = (
+        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/"
+        "hand_landmarker/float16/1/hand_landmarker.task"
+    )
+
     def __init__(self) -> None:
-        self._hands = mp.solutions.hands.Hands(
-            static_image_mode=False,
-            max_num_hands=1,
-            model_complexity=0,
-            min_detection_confidence=0.6,
-            min_tracking_confidence=0.6,
+        self._backend: str = ""
+        self._hands = None
+        self._landmarker = None
+
+        if hasattr(mp, "solutions"):
+            self._hands = mp.solutions.hands.Hands(
+                static_image_mode=True,
+                max_num_hands=2,
+                model_complexity=0,
+                min_detection_confidence=0.25,
+                min_tracking_confidence=0.25,
+            )
+            self._backend = "solutions"
+            return
+
+        self._landmarker = self._create_tasks_landmarker()
+        self._backend = "tasks"
+
+    def _ensure_task_model(self) -> str:
+        model_path = Path(__file__).resolve().parents[2] / "models" / "hand_landmarker.task"
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        if not model_path.exists():
+            urllib.request.urlretrieve(self._TASK_MODEL_URL, model_path)
+        return str(model_path)
+
+    def _create_tasks_landmarker(self):
+        from mediapipe.tasks.python import BaseOptions
+        from mediapipe.tasks.python import vision
+
+        options = vision.HandLandmarkerOptions(
+            base_options=BaseOptions(model_asset_path=self._ensure_task_model()),
+            num_hands=2,
+            min_hand_detection_confidence=0.25,
+            min_hand_presence_confidence=0.25,
+            min_tracking_confidence=0.25,
         )
+        return vision.HandLandmarker.create_from_options(options)
 
     def _decode_image(self, image_base64: str) -> np.ndarray:
         payload = image_base64
@@ -51,26 +91,88 @@ class MediaPipeService:
             )
 
         frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-        results = self._hands.process(frame_rgb)
-        if not results.multi_hand_landmarks:
+        try:
+            if self._backend == "solutions":
+                results = self._hands.process(frame_rgb)
+                if not results.multi_hand_landmarks:
+                    return HandDetectionResult(
+                        hand_detected=False,
+                        confidence=0.0,
+                        landmarks=[],
+                        handedness=None,
+                        handedness_score=0.0,
+                        secondary_landmarks=None,
+                        secondary_handedness=None,
+                        secondary_handedness_score=0.0,
+                    )
+                primary_points = results.multi_hand_landmarks[0].landmark
+                secondary_points = (
+                    results.multi_hand_landmarks[1].landmark
+                    if len(results.multi_hand_landmarks) > 1
+                    else None
+                )
+                handedness_label: str | None = None
+                handedness_score = 0.0
+                secondary_handedness_label: str | None = None
+                secondary_handedness_score = 0.0
+                if results.multi_handedness:
+                    classification = results.multi_handedness[0].classification[0]
+                    handedness_label = str(classification.label)
+                    handedness_score = float(classification.score)
+                    if len(results.multi_handedness) > 1:
+                        secondary_classification = results.multi_handedness[1].classification[0]
+                        secondary_handedness_label = str(secondary_classification.label)
+                        secondary_handedness_score = float(secondary_classification.score)
+            else:
+                mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_rgb)
+                result = self._landmarker.detect(mp_image)
+                if not result.hand_landmarks:
+                    return HandDetectionResult(
+                        hand_detected=False,
+                        confidence=0.0,
+                        landmarks=[],
+                        handedness=None,
+                        handedness_score=0.0,
+                        secondary_landmarks=None,
+                        secondary_handedness=None,
+                        secondary_handedness_score=0.0,
+                    )
+                primary_points = result.hand_landmarks[0]
+                secondary_points = result.hand_landmarks[1] if len(result.hand_landmarks) > 1 else None
+                handedness_label = None
+                handedness_score = 0.0
+                secondary_handedness_label: str | None = None
+                secondary_handedness_score = 0.0
+                if result.handedness:
+                    category = result.handedness[0][0]
+                    handedness_label = str(category.category_name)
+                    handedness_score = float(category.score)
+                    if len(result.handedness) > 1:
+                        secondary_category = result.handedness[1][0]
+                        secondary_handedness_label = str(secondary_category.category_name)
+                        secondary_handedness_score = float(secondary_category.score)
+        except Exception:
             return HandDetectionResult(
                 hand_detected=False,
                 confidence=0.0,
                 landmarks=[],
                 handedness=None,
                 handedness_score=0.0,
+                secondary_landmarks=None,
+                secondary_handedness=None,
+                secondary_handedness_score=0.0,
+                error="Hand detector runtime failure",
             )
 
         landmarks: list[list[float]] = []
-        for point in results.multi_hand_landmarks[0].landmark:
+        for point in primary_points:
             landmarks.append([float(point.x), float(point.y), float(point.z)])
 
-        handedness_label: str | None = None
-        handedness_score = 0.0
-        if results.multi_handedness:
-            classification = results.multi_handedness[0].classification[0]
-            handedness_label = str(classification.label)
-            handedness_score = float(classification.score)
+        secondary_landmarks: list[list[float]] | None = None
+        if secondary_points is not None:
+            secondary_landmarks = []
+            for point in secondary_points:
+                secondary_landmarks.append([float(point.x), float(point.y), float(point.z)])
 
         return HandDetectionResult(
             hand_detected=True,
@@ -78,6 +180,9 @@ class MediaPipeService:
             landmarks=landmarks,
             handedness=handedness_label,
             handedness_score=handedness_score,
+            secondary_landmarks=secondary_landmarks,
+            secondary_handedness=secondary_handedness_label,
+            secondary_handedness_score=secondary_handedness_score,
         )
 
 

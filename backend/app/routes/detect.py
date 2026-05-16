@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.models.request_models import DetectRequest
 from app.models.response_models import DetectionResponse
 from app.services.classification_service import classify_intent
+from app.services.gesture_service import detect_two_hand_help
 from app.services.mediapipe_service import mediapipe_service
 from app.services.phrase_mapper import map_intent_to_phrase
 from app.services.training_data_service import append_training_sample
@@ -56,16 +57,43 @@ def detect_sign(payload: DetectRequest) -> DetectionResponse:
     capture_saved = False
 
     if result.hand_detected:
-        gesture_result = classify_intent(
-            landmarks=result.landmarks,
-            handedness=result.handedness,
-            detector_confidence=result.confidence,
-        )
-        raw_intent = gesture_result.intent
-        raw_confidence = gesture_result.confidence
-        asl_yes_debug = gesture_result.debug
-        intent = raw_intent
-        confidence = raw_confidence
+        if (
+            result.secondary_landmarks is not None
+            and "help" in SUPPORTED_INTENTS
+        ):
+            is_two_hand_help, two_hand_confidence = detect_two_hand_help(
+                result.landmarks,
+                result.secondary_landmarks,
+                result.handedness,
+                result.secondary_handedness,
+            )
+            if is_two_hand_help:
+                raw_intent = "help"
+                raw_confidence = two_hand_confidence
+                intent = "help"
+                confidence = two_hand_confidence
+            else:
+                gesture_result = classify_intent(
+                    landmarks=result.landmarks,
+                    handedness=result.handedness,
+                    detector_confidence=result.confidence,
+                )
+                raw_intent = gesture_result.intent
+                raw_confidence = gesture_result.confidence
+                asl_yes_debug = gesture_result.debug
+                intent = raw_intent
+                confidence = raw_confidence
+        else:
+            gesture_result = classify_intent(
+                landmarks=result.landmarks,
+                handedness=result.handedness,
+                detector_confidence=result.confidence,
+            )
+            raw_intent = gesture_result.intent
+            raw_confidence = gesture_result.confidence
+            asl_yes_debug = gesture_result.debug
+            intent = raw_intent
+            confidence = raw_confidence
 
         if intent and intent in SUPPORTED_INTENTS:
             threshold = INTENT_THRESHOLDS.get(intent, 0.7)

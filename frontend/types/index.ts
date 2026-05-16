@@ -1,5 +1,6 @@
 export type Intent =
-  | "yes";
+  | "yes"
+  | "help";
 
 export type CameraPermission = "idle" | "requesting" | "granted" | "denied" | "error";
 
