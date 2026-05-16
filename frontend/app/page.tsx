@@ -1,11 +1,5 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return (
-    <main style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>SignLang Detector</h1>
-      <p>Frontend is running successfully.</p>
-      <Link href="/detect">Go to detection page</Link>
-    </main>
-  );
+  redirect("/gatekeeper");
 }
