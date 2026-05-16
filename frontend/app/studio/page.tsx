@@ -8,6 +8,14 @@ export default function StudioPage() {
   const [cameraStatus, setCameraStatus] = useState<"loading" | "ready" | "denied">(
     "loading",
   );
+  const [subtitleVisible, setSubtitleVisible] = useState(true);
+  const [subtitleIndex, setSubtitleIndex] = useState(0);
+
+  const subtitleFrames = [
+    { gloss: "[YOU] [NAME] [WHAT]", translation: "What is your name?" },
+    { gloss: "[I] [LEARN] [SIGN] [LANGUAGE]", translation: "I am learning sign language." },
+    { gloss: "[PLEASE] [REPEAT] [SLOW]", translation: "Please repeat that slowly." },
+  ];
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -42,6 +50,18 @@ export default function StudioPage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSubtitleVisible(false);
+      window.setTimeout(() => {
+        setSubtitleIndex((prev) => (prev + 1) % subtitleFrames.length);
+        setSubtitleVisible(true);
+      }, 220);
+    }, 4200);
+
+    return () => window.clearInterval(timer);
+  }, [subtitleFrames.length]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#050814] via-[#070b18] to-[#050711] px-4 py-4 text-zinc-100 sm:px-6 lg:px-8">
@@ -84,15 +104,19 @@ export default function StudioPage() {
             LIVE
           </div>
 
-          <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/10 bg-zinc-900/75 p-4 backdrop-blur-xl">
-            <div className="mb-2 flex items-center gap-2 text-xs tracking-[0.12em] text-zinc-400">
-              <Captions className="h-3.5 w-3.5 text-indigo-300" aria-hidden="true" />
-              LIVE TELEPROMPTER
+          <div className="absolute bottom-0 left-1/2 w-[min(96%,980px)] -translate-x-1/2 overflow-hidden rounded-t-2xl border border-white/10 bg-zinc-900/70 px-4 pb-4 pt-3 backdrop-blur-2xl sm:px-6 sm:pb-5 sm:pt-4">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-900/95 via-zinc-900/80 to-transparent" />
+            <div
+              className={`relative transform-gpu transition-all duration-300 ${subtitleVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}
+            >
+              <div className="mb-1 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.16em] text-zinc-300/85 sm:text-xs">
+                <Captions className="h-3.5 w-3.5 text-indigo-300" aria-hidden="true" />
+                {subtitleFrames[subtitleIndex].gloss}
+              </div>
+              <p className="text-center text-xl font-bold leading-tight text-white antialiased sm:text-3xl">
+                {subtitleFrames[subtitleIndex].translation}
+              </p>
             </div>
-            <p className="text-lg font-medium leading-relaxed text-zinc-100 sm:text-xl">
-              Hello! I can translate your sign language into voice in real time.
-              Keep your hands inside the highlighted frame.
-            </p>
           </div>
         </div>
 
