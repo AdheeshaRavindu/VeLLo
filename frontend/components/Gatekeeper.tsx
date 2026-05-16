@@ -133,9 +133,9 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
           <div className="mt-4 w-full rounded-[32px] border border-emerald-200/70 bg-white/55 p-4 shadow-[0_18px_42px_rgba(6,95,70,0.18),0_0_42px_rgba(16,185,129,0.14)] backdrop-blur-2xl">
             <div className="relative h-[220px] overflow-hidden rounded-[28px] border border-emerald-300/45 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[250px]">
               <img
-                src="https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                alt="Person demonstrating a sign language hand gesture"
-                className="h-full w-full object-cover object-center opacity-92"
+                src="/models/woman-sign.png"
+                alt="Woman demonstrating a sign language hand gesture"
+                className="h-full w-full object-contain object-center opacity-92"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/30 via-emerald-900/5 to-transparent" />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(16,185,129,0.18),transparent_45%)]" />
