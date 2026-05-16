@@ -17,11 +17,11 @@ class HandDetectionResult:
 class MediaPipeService:
     def __init__(self) -> None:
         self._hands = mp.solutions.hands.Hands(
-            static_image_mode=True,
+            static_image_mode=False,
             max_num_hands=1,
             model_complexity=0,
-            min_detection_confidence=0.55,
-            min_tracking_confidence=0.5,
+            min_detection_confidence=0.6,
+            min_tracking_confidence=0.6,
         )
 
     def _decode_image(self, image_base64: str) -> np.ndarray:

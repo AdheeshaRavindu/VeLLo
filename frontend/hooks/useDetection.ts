@@ -4,7 +4,9 @@ import type { RefObject } from "react";
 import { detectSign } from "@/services/api";
 import type { DetectionResponse, Intent } from "@/types";
 
-const POLL_INTERVAL_MS = 800;
+const POLL_INTERVAL_MS = 250;
+const MAX_FRAME_WIDTH = 640;
+const JPEG_QUALITY = 0.65;
 
 interface UseDetectionProps {
   videoRef: RefObject<HTMLVideoElement>;
@@ -26,6 +28,7 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stableIntentRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
+  const inFlightRef = useRef(false);
 
   const captureFrame = useCallback((): string | null => {
     const video = videoRef.current;
@@ -37,15 +40,18 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
       canvasRef.current = document.createElement("canvas");
     }
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const sourceWidth = video.videoWidth;
+    const sourceHeight = video.videoHeight;
+    const scale = sourceWidth > MAX_FRAME_WIDTH ? MAX_FRAME_WIDTH / sourceWidth : 1;
+    canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+    canvas.height = Math.max(1, Math.round(sourceHeight * scale));
     const context = canvas.getContext("2d");
     if (!context) {
       return null;
     }
 
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.8);
+    return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
   }, [videoRef]);
 
   const runDetection = useCallback(
@@ -60,6 +66,10 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
       }
 
       try {
+        if (inFlightRef.current) {
+          return;
+        }
+        inFlightRef.current = true;
         setIsDetecting(true);
         setError(null);
         const result = await detectSign({
@@ -90,6 +100,7 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
       } catch (err) {
         setError(err instanceof Error ? err.message : "Detection failed");
       } finally {
+        inFlightRef.current = false;
         setIsDetecting(false);
       }
     },
@@ -114,10 +125,21 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
     if (!enabled) {
       return;
     }
-    const timer = window.setInterval(() => {
-      void detectNow();
-    }, POLL_INTERVAL_MS);
-    return () => window.clearInterval(timer);
+    let timer: number | undefined;
+
+    const schedule = () => {
+      timer = window.setTimeout(async () => {
+        await detectNow();
+        schedule();
+      }, POLL_INTERVAL_MS);
+    };
+
+    schedule();
+    return () => {
+      if (timer) {
+        window.clearTimeout(timer);
+      }
+    };
   }, [detectNow, enabled]);
 
   return useMemo(
