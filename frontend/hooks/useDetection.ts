@@ -7,7 +7,7 @@ import type { DetectionResponse, Intent } from "@/types";
 const POLL_INTERVAL_MS = 250;
 const MAX_FRAME_WIDTH = 800;
 const JPEG_QUALITY = 0.75;
-const LIVE_STABILITY_FRAMES = 1;
+const LIVE_STABILITY_FRAMES = 2;
 
 interface UseDetectionProps {
   videoRef: RefObject<HTMLVideoElement>;
