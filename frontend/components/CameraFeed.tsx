@@ -13,7 +13,7 @@ export default function CameraFeed({ videoRef, isActive }: CameraFeedProps) {
         autoPlay
         muted
         playsInline
-        className="aspect-video w-full bg-slate-900 object-cover"
+        className="aspect-video w-full -scale-x-100 bg-slate-900 object-cover"
       />
       {!isActive && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 p-4 text-center text-base font-medium text-white">

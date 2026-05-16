@@ -46,11 +46,15 @@ def classify_gesture(landmarks: list[list[float]]) -> GestureResult:
     raised = _raised_mask(landmarks)
     thumb_up, index_up, middle_up, ring_up, pinky_up = raised
     pinch_distance = _distance(landmarks[4], landmarks[8])
+    palm_spread = _distance(landmarks[8], landmarks[20])
 
-    # Open palm: primary intent for MVP.
+    # ASL-inspired emergency variant: open palm with wider spread.
+    if raised_fingers == 5 and palm_spread > 0.40:
+        return GestureResult(intent="emergency", confidence=0.86)
+
+    # ASL-inspired help: open palm.
     if raised_fingers == 5:
-        confidence = 0.9
-        return GestureResult(intent="help", confidence=confidence)
+        return GestureResult(intent="help", confidence=0.82)
 
     if raised_fingers == 4 and not thumb_up:
         return GestureResult(intent="stop", confidence=0.84)
@@ -66,24 +70,6 @@ def classify_gesture(landmarks: list[list[float]]) -> GestureResult:
 
     if thumb_up and not index_up and not middle_up and not ring_up and not pinky_up:
         return GestureResult(intent="water", confidence=0.78)
-
-    if thumb_up and index_up and not middle_up and not ring_up and not pinky_up:
-        return GestureResult(intent="chest_pain", confidence=0.79)
-
-    if not thumb_up and index_up and middle_up and ring_up and not pinky_up:
-        return GestureResult(intent="emergency", confidence=0.8)
-
-    if not thumb_up and index_up and middle_up and ring_up and pinky_up:
-        return GestureResult(intent="breathing_problem", confidence=0.8)
-
-    if not thumb_up and not index_up and middle_up and not ring_up and not pinky_up:
-        return GestureResult(intent="dizzy", confidence=0.77)
-
-    if not thumb_up and not index_up and not middle_up and ring_up and not pinky_up:
-        return GestureResult(intent="hungry", confidence=0.77)
-
-    if not thumb_up and not index_up and not middle_up and not ring_up and pinky_up:
-        return GestureResult(intent="toilet", confidence=0.77)
 
     if thumb_up and index_up and pinch_distance < 0.06:
         return GestureResult(intent="yes", confidence=0.8)

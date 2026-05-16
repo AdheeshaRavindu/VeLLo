@@ -32,12 +32,14 @@ def detect_sign(payload: DetectRequest) -> DetectionResponse:
         gesture_result = classify_gesture(result.landmarks)
         intent = gesture_result.intent
         confidence = gesture_result.confidence
-        if intent:
+        if intent and intent in SUPPORTED_INTENTS:
             threshold = INTENT_THRESHOLDS.get(intent, 0.7)
             if confidence >= threshold:
                 phrase = map_intent_to_phrase(intent)
             else:
                 intent = None
+        else:
+            intent = None
 
     return DetectionResponse(
         hand_detected=result.hand_detected,
