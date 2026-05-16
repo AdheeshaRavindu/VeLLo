@@ -12,6 +12,9 @@ import { useCamera } from "@/hooks/useCamera";
 import { useDetection } from "@/hooks/useDetection";
 import type { Intent } from "@/types";
 
+const MIN_OUTPUT_CONFIDENCE = 0.9;
+type OutputSuppressionReason = "no_phrase_from_backend" | "confidence_below_display_gate" | null;
+
 export default function DetectPage() {
   const [mode, setMode] = useState<"live" | "demo">("live");
   const { videoRef, startCamera, isReady, permission, error } = useCamera();
@@ -27,6 +30,20 @@ export default function DetectPage() {
   const onDemoSelect = (intent: Intent) => {
     void triggerDemoIntent(intent);
   };
+
+  const confidence = detection?.confidence ?? 0;
+  const hasDisplayConfidence = confidence >= MIN_OUTPUT_CONFIDENCE;
+  const outputPhrase = hasDisplayConfidence
+    ? detection?.phrase ?? detection?.intent ?? null
+    : null;
+  let outputSuppressionReason: OutputSuppressionReason = null;
+  if (detection && !outputPhrase) {
+    if (confidence < MIN_OUTPUT_CONFIDENCE) {
+      outputSuppressionReason = "confidence_below_display_gate";
+    } else {
+      outputSuppressionReason = "no_phrase_from_backend";
+    }
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl p-4 md:p-8">
@@ -86,8 +103,13 @@ export default function DetectPage() {
             isDetecting={isDetecting}
             error={detectionError}
           />
-          <PhraseCard phrase={detection?.phrase ?? null} confidence={detection?.confidence ?? 0} />
-          <AudioPlayer phrase={detection?.phrase ?? null} />
+          <PhraseCard
+            phrase={outputPhrase}
+            confidence={confidence}
+            displayThreshold={MIN_OUTPUT_CONFIDENCE}
+            suppressionReason={outputSuppressionReason}
+          />
+          <AudioPlayer phrase={outputPhrase} />
           {mode === "demo" ? <DemoButtons onSelectIntent={onDemoSelect} /> : null}
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
             Mode: <strong>{mode}</strong> | Permission: {permission}

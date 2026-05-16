@@ -1,12 +1,40 @@
-version: "3.8"
-
 services:
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+    container_name: signlang-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      PYTHONUNBUFFERED: "1"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    working_dir: /app
     volumes:
       - ./backend:/app
+      - ./shared:/shared:ro
     ports:
       - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: signlang-frontend
+    command: npm run dev -- --hostname 0.0.0.0 --port 3000
+    working_dir: /app
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
 

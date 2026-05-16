@@ -1,14 +1,13 @@
 import type { Intent } from "@/types";
 
 const DEMO_INTENTS: Intent[] = [
+  "yes",
+  "no",
   "help",
   "water",
-  "doctor",
   "medicine",
   "emergency",
   "pain",
-  "yes",
-  "no",
   "stop",
   "thank_you",
 ];
@@ -21,7 +20,7 @@ export default function DemoButtons({ onSelectIntent }: DemoButtonsProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">Demo Mode</p>
-      <p className="mb-3 text-xs text-slate-600">ASL-inspired 10-intent subset</p>
+      <p className="mb-3 text-xs text-slate-600">Single-sign stabilization mode</p>
       <div className="grid grid-cols-2 gap-2">
         {DEMO_INTENTS.map((intent) => (
           <button
