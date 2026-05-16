@@ -5,13 +5,16 @@ import {
   ArrowRight,
   AudioLines,
   Camera,
-  CheckCircle2,
   Globe,
   Hand,
   Lock,
   Mic,
   ChevronDown,
+  ShieldCheck,
+  ScanLine,
   Sparkles,
+  Volume2,
+  Languages,
 } from "lucide-react";
 
 type PermissionState = "idle" | "requesting" | "denied";
@@ -210,21 +213,48 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
             </p>
           </div>
 
-          <div className="mt-4 grid w-full max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2">
-            {[
-              "Real-time Detection",
-              "Instant Translation",
-              "Voice Output",
-              "100% Private",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-2 rounded-xl border border-zinc-800/80 bg-zinc-900/45 px-3 py-2 text-left text-xs text-zinc-300 backdrop-blur"
-              >
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-blue-300" aria-hidden="true" />
-                {item}
-              </div>
-            ))}
+          <div className="mt-4 w-full max-w-3xl rounded-2xl border border-white/10 bg-zinc-900/45 p-3 shadow-[0_0_30px_rgba(99,102,241,0.12)] backdrop-blur-xl">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  title: "Real-time Detection",
+                  desc: "Detect signs instantly",
+                  icon: <ScanLine className="h-4 w-4" aria-hidden="true" />,
+                  tone: "text-blue-300 border-blue-400/30 bg-blue-500/10 shadow-[0_0_14px_rgba(59,130,246,0.35)]",
+                },
+                {
+                  title: "Instant Translation",
+                  desc: "Convert signs to speech",
+                  icon: <Languages className="h-4 w-4" aria-hidden="true" />,
+                  tone: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10 shadow-[0_0_14px_rgba(16,185,129,0.35)]",
+                },
+                {
+                  title: "Voice Output",
+                  desc: "Hear clear spoken output",
+                  icon: <Volume2 className="h-4 w-4" aria-hidden="true" />,
+                  tone: "text-amber-300 border-amber-400/30 bg-amber-500/10 shadow-[0_0_14px_rgba(245,158,11,0.3)]",
+                },
+                {
+                  title: "100% Private",
+                  desc: "No recording or storage",
+                  icon: <ShieldCheck className="h-4 w-4" aria-hidden="true" />,
+                  tone: "text-violet-300 border-violet-400/30 bg-violet-500/10 shadow-[0_0_14px_rgba(139,92,246,0.35)]",
+                },
+              ].map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-xl border border-zinc-800/80 bg-zinc-950/45 px-3 py-2.5 text-left"
+                >
+                  <span
+                    className={`mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full border ${item.tone}`}
+                  >
+                    {item.icon}
+                  </span>
+                  <p className="text-xs font-semibold text-zinc-200">{item.title}</p>
+                  <p className="mt-0.5 text-[11px] text-zinc-400">{item.desc}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
       </div>
