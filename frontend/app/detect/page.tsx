@@ -17,9 +17,10 @@ type OutputSuppressionReason = "no_phrase_from_backend" | "confidence_below_disp
 
 export default function DetectPage() {
   const [mode, setMode] = useState<"live" | "demo">("live");
-  const { videoRef, startCamera, isReady, permission, error } = useCamera();
+  const { videoRef, startCamera, isReady, permission, error, trackingSnapshot, getTrackingSnapshot } =
+    useCamera();
   const { detection, isDetecting, error: detectionError, triggerDemoIntent } = useDetection({
-    videoRef,
+    getTrackingSnapshot,
     enabled: isReady && mode === "live",
   });
 
@@ -83,7 +84,11 @@ export default function DetectPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <CameraFeed videoRef={videoRef} isActive={isReady && mode === "live"} />
+        <CameraFeed
+          videoRef={videoRef}
+          isActive={isReady && mode === "live"}
+          trackingSnapshot={trackingSnapshot}
+        />
         <div className="space-y-4">
           <LoadingState
             title={
