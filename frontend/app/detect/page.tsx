@@ -12,6 +12,9 @@ import { useCamera } from "@/hooks/useCamera";
 import { useDetection } from "@/hooks/useDetection";
 import type { Intent } from "@/types";
 
+const MIN_OUTPUT_CONFIDENCE = 0.9;
+type OutputSuppressionReason = "no_phrase_from_backend" | "confidence_below_display_gate" | null;
+
 export default function DetectPage() {
   const [mode, setMode] = useState<"live" | "demo">("live");
   const { videoRef, startCamera, isReady, permission, error } = useCamera();
@@ -27,6 +30,18 @@ export default function DetectPage() {
   const onDemoSelect = (intent: Intent) => {
     void triggerDemoIntent(intent);
   };
+
+  const shouldDisplayOutput =
+    Boolean(detection?.phrase) && (detection?.confidence ?? 0) >= MIN_OUTPUT_CONFIDENCE;
+  const outputPhrase = shouldDisplayOutput ? detection?.phrase ?? null : null;
+  let outputSuppressionReason: OutputSuppressionReason = null;
+  if (detection && !shouldDisplayOutput) {
+    if (!detection.phrase) {
+      outputSuppressionReason = "no_phrase_from_backend";
+    } else if (detection.confidence < MIN_OUTPUT_CONFIDENCE) {
+      outputSuppressionReason = "confidence_below_display_gate";
+    }
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl p-4 md:p-8">
@@ -86,8 +101,13 @@ export default function DetectPage() {
             isDetecting={isDetecting}
             error={detectionError}
           />
-          <PhraseCard phrase={detection?.phrase ?? null} confidence={detection?.confidence ?? 0} />
-          <AudioPlayer phrase={detection?.phrase ?? null} />
+          <PhraseCard
+            phrase={outputPhrase}
+            confidence={detection?.confidence ?? 0}
+            displayThreshold={MIN_OUTPUT_CONFIDENCE}
+            suppressionReason={outputSuppressionReason}
+          />
+          <AudioPlayer phrase={outputPhrase} />
           {mode === "demo" ? <DemoButtons onSelectIntent={onDemoSelect} /> : null}
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
             Mode: <strong>{mode}</strong> | Permission: {permission}

@@ -5,8 +5,9 @@ import { detectSign } from "@/services/api";
 import type { DetectionResponse, Intent } from "@/types";
 
 const POLL_INTERVAL_MS = 250;
-const MAX_FRAME_WIDTH = 640;
-const JPEG_QUALITY = 0.65;
+const MAX_FRAME_WIDTH = 800;
+const JPEG_QUALITY = 0.75;
+const LIVE_STABILITY_FRAMES = 1;
 
 interface UseDetectionProps {
   videoRef: RefObject<HTMLVideoElement>;
@@ -77,7 +78,7 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
           demo_intent: intent,
         });
 
-        // Require two consecutive same intents before showing phrase in live mode.
+        // Single-sign mode: surface detections immediately to avoid hiding valid "yes" frames.
         if (!intent) {
           if (result.intent && result.intent === stableIntentRef.current) {
             stableCountRef.current += 1;
@@ -89,7 +90,7 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
             stableCountRef.current = 0;
           }
 
-          if (result.intent && stableCountRef.current < 2) {
+          if (result.intent && stableCountRef.current < LIVE_STABILITY_FRAMES) {
             setDetection({ ...result, intent: null, phrase: null });
           } else {
             setDetection(result);
