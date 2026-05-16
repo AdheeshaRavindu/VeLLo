@@ -176,32 +176,32 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               type="button"
               disabled={permissionState === "requesting"}
               onClick={requestPermission}
-              className="group w-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 p-[1px] shadow-[0_0_48px_rgba(79,70,229,0.48)] transition duration-200 hover:scale-[1.01] hover:shadow-[0_0_64px_rgba(99,102,241,0.62)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+              className="group w-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 bg-[length:200%_100%] [background-position:0%_50%] p-[1.5px] shadow-[0_0_52px_rgba(79,70,229,0.52)] transition-[transform,box-shadow,background-position] duration-300 ease-out hover:scale-[1.012] hover:[background-position:100%_50%] hover:shadow-[0_0_72px_rgba(99,102,241,0.72)] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
             >
-              <span className="flex w-full items-center justify-between gap-3 rounded-full bg-zinc-950/75 px-4 py-3 text-left sm:px-6">
+              <span className="flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-zinc-950/60 px-5 py-3.5 text-left backdrop-blur-xl sm:px-7">
                 <span className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 shadow-[0_0_16px_rgba(59,130,246,0.28)]">
                     {permissionState === "requesting" ? (
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white" />
                     ) : (
-                      <Camera className="h-4.5 w-4.5" aria-hidden="true" />
+                      <Camera className="h-5 w-5" aria-hidden="true" />
                     )}
                   </span>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
-                    <Mic className="h-4.5 w-4.5" aria-hidden="true" />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 shadow-[0_0_16px_rgba(139,92,246,0.28)]">
+                    <Mic className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <span>
-                    <span className="block text-sm font-semibold text-white sm:text-base">
+                    <span className="block text-sm font-semibold text-white sm:text-lg">
                       {permissionState === "requesting"
                         ? "Waiting for permission..."
                         : "Enable Camera & Mic"}
                     </span>
-                    <span className="block text-xs text-zinc-200/80">
+                    <span className="block text-xs text-zinc-200/85 sm:text-sm">
                       Click to get started
                     </span>
                   </span>
                 </span>
-                <ArrowRight className="h-5 w-5 text-white transition group-hover:translate-x-1" aria-hidden="true" />
+                <ArrowRight className="h-5 w-5 text-white transition duration-300 group-hover:translate-x-1.5" aria-hidden="true" />
               </span>
             </button>
             <p className="mt-2 inline-flex items-center gap-2 text-xs text-zinc-400">
