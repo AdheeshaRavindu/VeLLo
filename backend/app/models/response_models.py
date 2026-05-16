@@ -7,6 +7,11 @@ class DetectionResponse(BaseModel):
     intent: str | None
     phrase: str | None
     source: str
+    handedness: str | None = None
+    handedness_score: float | None = None
+    detector_confidence: float | None = None
+    debug_landmarks: list[list[float]] | None = None
+    capture_saved: bool = False
     error: str | None = None
 
 

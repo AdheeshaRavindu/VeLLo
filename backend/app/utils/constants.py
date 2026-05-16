@@ -12,15 +12,17 @@ SUPPORTED_INTENTS: list[str] = [
 ]
 
 INTENT_THRESHOLDS: dict[str, float] = {
-    "help": 0.70,
-    "water": 0.70,
-    "doctor": 0.70,
-    "medicine": 0.70,
-    "emergency": 0.75,
-    "pain": 0.70,
-    "yes": 0.70,
-    "no": 0.70,
-    "stop": 0.70,
-    "thank_you": 0.70,
+    "help": 0.74,
+    "water": 0.73,
+    "doctor": 0.74,
+    "medicine": 0.75,
+    "emergency": 0.82,
+    "pain": 0.72,
+    "yes": 0.78,
+    "no": 0.76,
+    "stop": 0.77,
+    "thank_you": 0.74,
 }
+
+CLASSIFIER_MODE: str = "rule"
 
