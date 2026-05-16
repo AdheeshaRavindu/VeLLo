@@ -256,19 +256,19 @@ export default function StudioPage() {
           </div>
         </div>
 
-        <aside className="hidden h-full min-h-0 rounded-3xl border border-emerald-300/45 bg-white/65 p-2.5 shadow-[0_0_34px_rgba(16,185,129,0.16)] backdrop-blur-2xl lg:flex lg:flex-col">
-          <div className="mb-3 flex items-center justify-between">
+        <aside className="hidden h-full min-h-0 rounded-3xl border border-emerald-300/20 bg-[#071225]/70 p-2 shadow-[0_16px_40px_rgba(2,6,23,0.35),0_0_24px_rgba(16,185,129,0.12),0_0_20px_rgba(56,189,248,0.08)] backdrop-blur-2xl lg:flex lg:flex-col">
+          <div className="mb-2 flex items-center justify-between">
             {panelOpen ? (
-              <h2 className="text-sm font-semibold tracking-[0.14em] text-emerald-900">
+              <h2 className="text-sm font-semibold tracking-[0.14em] text-emerald-100">
                 COMMAND CENTER
               </h2>
             ) : (
-              <div className="text-xs tracking-[0.12em] text-emerald-800/80">TOOLS</div>
+              <div className="text-xs tracking-[0.12em] text-emerald-100/70">TOOLS</div>
             )}
             <button
               type="button"
               onClick={() => setPanelOpen((prev) => !prev)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-300/55 bg-white/80 text-emerald-900 transition hover:border-emerald-500/70 hover:text-emerald-950"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-300/30 bg-[#0b1a31]/70 text-emerald-100 transition hover:border-emerald-300/60 hover:text-white"
               aria-label="Toggle command center panel"
             >
               {panelOpen ? (
@@ -281,8 +281,8 @@ export default function StudioPage() {
 
           {panelOpen ? (
             <div className="min-h-0 flex-1 overflow-hidden">
-              <div className="flex h-full flex-col space-y-2.5">
-                <article className="rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+              <div className="flex h-full flex-col space-y-2">
+                <article className="rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
                   <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
                     <Video className="h-3.5 w-3.5 text-emerald-300" />
                     Detection Status
@@ -309,14 +309,14 @@ export default function StudioPage() {
                   </div>
                 </article>
 
-                <article className="rounded-2xl border border-emerald-300/40 bg-white/78 p-3 shadow-[0_0_16px_rgba(16,185,129,0.14)] backdrop-blur-xl">
-                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
-                    <Languages className="h-3.5 w-3.5 text-lime-600" />
+                <article className="rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
+                    <Languages className="h-3.5 w-3.5 text-emerald-300" />
                     Recognized Phrase
                   </div>
-                  <div className="flex min-h-[170px] flex-col items-center justify-center rounded-xl border border-emerald-300/45 bg-white/85 px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
+                  <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-emerald-400/25 bg-emerald-900/50 px-3 py-3 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
                     <p
-                      className={`max-w-[15ch] text-balance text-2xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-950 transition-all duration-300 sm:text-[1.7rem] ${
+                      className={`max-w-[15ch] text-balance text-2xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-50 transition-all duration-300 sm:text-[1.7rem] ${
                         subtitleVisible
                           ? "opacity-100 shadow-[0_0_16px_rgba(16,185,129,0.22)]"
                           : "opacity-55"
@@ -324,13 +324,13 @@ export default function StudioPage() {
                     >
                       {recognizedPhrase}
                     </p>
-                    <p className="mt-4 text-[11px] text-emerald-800/70">
-                      Confidence: <span className="font-semibold text-emerald-900">{confidenceText}</span>
+                    <p className="mt-3 text-[10px] text-emerald-100/65">
+                      Confidence: <span className="font-semibold text-emerald-100">{confidenceText}</span>
                     </p>
                   </div>
                 </article>
 
-                <article className="min-h-0 flex flex-1 flex-col rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+                <article className="min-h-0 flex flex-1 flex-col rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
                   <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
                     <Volume2 className="h-3.5 w-3.5 text-emerald-300" />
                     Live Translation Stream
@@ -363,12 +363,12 @@ export default function StudioPage() {
               </div>
             </div>
           ) : (
-            <div className="flex h-[calc(100%-44px)] flex-col items-center justify-start gap-3 pt-3">
+            <div className="flex h-[calc(100%-44px)] flex-col items-center justify-start gap-2.5 pt-2">
               {[<Video key="v" className="h-4 w-4" />, <Languages key="l" className="h-4 w-4" />, <Volume2 key="a" className="h-4 w-4" />].map(
                 (icon, index) => (
                   <span
                     key={index}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-300/45 bg-white/80 text-emerald-900"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-300/30 bg-[#0b1a31]/70 text-emerald-100"
                   >
                     {icon}
                   </span>
@@ -382,7 +382,7 @@ export default function StudioPage() {
       <button
         type="button"
         onClick={() => setMobileDrawerOpen(true)}
-        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-emerald-300/50 bg-white/85 px-4 py-2 text-xs tracking-[0.1em] text-emerald-900 shadow-[0_0_20px_rgba(16,185,129,0.2)] backdrop-blur-xl lg:hidden"
+        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-[#0b1a31]/78 px-4 py-2 text-xs tracking-[0.1em] text-emerald-100 shadow-[0_0_18px_rgba(16,185,129,0.16),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl lg:hidden"
       >
         <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
         COMMAND CENTER
@@ -394,7 +394,7 @@ export default function StudioPage() {
       />
 
       <aside
-        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[72vh] rounded-t-3xl border border-emerald-300/45 bg-white/88 p-4 shadow-[0_-10px_40px_rgba(6,95,70,0.24)] backdrop-blur-2xl transition-transform duration-300 lg:hidden ${mobileDrawerOpen ? "translate-y-0" : "translate-y-full"}`}
+        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[72vh] rounded-t-3xl border border-emerald-300/25 bg-[#071225]/86 p-3.5 shadow-[0_-10px_36px_rgba(2,6,23,0.45),0_0_18px_rgba(16,185,129,0.14),0_0_12px_rgba(56,189,248,0.1)] backdrop-blur-2xl transition-transform duration-300 lg:hidden ${mobileDrawerOpen ? "translate-y-0" : "translate-y-full"}`}
         onTouchStart={(e) => {
           touchStartY.current = e.touches[0]?.clientY ?? null;
         }}
@@ -406,20 +406,20 @@ export default function StudioPage() {
           touchStartY.current = null;
         }}
       >
-        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-emerald-500/35" />
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold tracking-[0.14em] text-emerald-900">COMMAND CENTER</h2>
+        <div className="mx-auto mb-2.5 h-1.5 w-12 rounded-full bg-emerald-300/35" />
+        <div className="mb-2.5 flex items-center justify-between">
+          <h2 className="text-sm font-semibold tracking-[0.14em] text-emerald-100">COMMAND CENTER</h2>
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(false)}
-            className="rounded-lg border border-emerald-300/50 bg-white/80 px-2 py-1 text-xs text-emerald-900"
+            className="rounded-lg border border-emerald-300/30 bg-[#0b1a31]/75 px-2 py-1 text-xs text-emerald-100"
           >
             CLOSE
           </button>
         </div>
         <div className="overflow-y-auto pb-2">
-          <div className="space-y-2.5">
-            <article className="rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+          <div className="space-y-2">
+            <article className="rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
               <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
                 <Video className="h-3.5 w-3.5 text-emerald-300" />
                 Detection Status
@@ -446,14 +446,14 @@ export default function StudioPage() {
               </div>
             </article>
 
-            <article className="rounded-2xl border border-emerald-300/40 bg-white/80 p-3">
-              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-900">
-                <Languages className="h-3.5 w-3.5 text-lime-600" />
+            <article className="rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
+                <Languages className="h-3.5 w-3.5 text-emerald-300" />
                 Recognized Phrase
               </div>
-              <div className="flex min-h-[150px] flex-col items-center justify-center rounded-xl border border-emerald-300/45 bg-white/85 px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
+              <div className="flex min-h-[126px] flex-col items-center justify-center rounded-xl border border-emerald-400/25 bg-emerald-900/50 px-3 py-3 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
                 <p
-                  className={`max-w-[15ch] text-balance text-xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-950 transition-all duration-300 ${
+                  className={`max-w-[15ch] text-balance text-xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-50 transition-all duration-300 ${
                     subtitleVisible
                       ? "opacity-100 shadow-[0_0_14px_rgba(16,185,129,0.2)]"
                       : "opacity-55"
@@ -461,13 +461,13 @@ export default function StudioPage() {
                 >
                   {recognizedPhrase}
                 </p>
-                <p className="mt-3 text-[11px] text-emerald-800/70">
-                  Confidence: <span className="font-semibold text-emerald-900">{confidenceText}</span>
+                <p className="mt-2.5 text-[10px] text-emerald-100/65">
+                  Confidence: <span className="font-semibold text-emerald-100">{confidenceText}</span>
                 </p>
               </div>
             </article>
 
-            <article className="rounded-2xl border border-emerald-400/30 bg-emerald-950/72 p-3 shadow-[0_0_20px_rgba(16,185,129,0.18)] backdrop-blur-xl">
+            <article className="rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
               <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
                 <Volume2 className="h-3.5 w-3.5 text-emerald-300" />
                 Live Translation Stream
