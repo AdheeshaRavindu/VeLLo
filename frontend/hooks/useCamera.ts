@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
+import type { HandLandmarker } from "@mediapipe/tasks-vision";
 import type { CameraPermission } from "@/types";
 
 const HAND_LANDMARKER_MODEL_URL =
@@ -118,10 +118,16 @@ export function useCamera(): UseCameraResult {
     if (handLandmarkerRef.current) {
       return handLandmarkerRef.current;
     }
+    // Dynamically import the browser-only MediaPipe package to avoid
+    // Next.js server-side bundling issues during build.
+    const mp = await import("@mediapipe/tasks-vision");
+    const FilesetResolver = mp.FilesetResolver ?? (mp as any).FilesetResolver;
+    const HandLandmarkerCtor = mp.HandLandmarker ?? (mp as any).HandLandmarker;
+
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
     );
-    handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
+    handLandmarkerRef.current = await HandLandmarkerCtor.createFromOptions(vision, {
       baseOptions: {
         modelAssetPath: HAND_LANDMARKER_MODEL_URL,
       },
