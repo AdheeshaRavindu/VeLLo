@@ -28,20 +28,29 @@ class MediaPipeService:
         self._backend: str = ""
         self._hands = None
         self._landmarker = None
+        self._init_error: str | None = None
 
         if hasattr(mp, "solutions"):
-            self._hands = mp.solutions.hands.Hands(
-                static_image_mode=True,
-                max_num_hands=2,
-                model_complexity=0,
-                min_detection_confidence=0.25,
-                min_tracking_confidence=0.25,
-            )
-            self._backend = "solutions"
-            return
+            try:
+                self._hands = mp.solutions.hands.Hands(
+                    static_image_mode=True,
+                    max_num_hands=2,
+                    model_complexity=0,
+                    min_detection_confidence=0.25,
+                    min_tracking_confidence=0.25,
+                )
+                self._backend = "solutions"
+                return
+            except Exception as exc:
+                self._init_error = f"MediaPipe solutions init failed: {exc}"
 
-        self._landmarker = self._create_tasks_landmarker()
-        self._backend = "tasks"
+        try:
+            self._landmarker = self._create_tasks_landmarker()
+            self._backend = "tasks"
+        except Exception as exc:
+            self._init_error = self._init_error or f"MediaPipe tasks init failed: {exc}"
+            self._landmarker = None
+            self._backend = "unavailable"
 
     def _ensure_task_model(self) -> str:
         model_path = Path(__file__).resolve().parents[2] / "models" / "hand_landmarker.task"
@@ -129,7 +138,7 @@ class MediaPipeService:
                     landmarks=[],
                     handedness=None,
                     handedness_score=0.0,
-                    error="MediaPipe backend unavailable",
+                    error=self._init_error or "MediaPipe backend unavailable",
                 )
 
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_rgb)

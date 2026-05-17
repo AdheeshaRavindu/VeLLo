@@ -22,6 +22,15 @@ Use Docker Compose so contributors do not need local Python/Node setup.
 - Docker Desktop installed and running
 - Ports `3000` and `8000` available
 
+### Optional backend env (voice + model)
+If you want ElevenLabs voice output or custom classifier settings:
+
+```powershell
+copy backend\.env.example backend\.env
+```
+
+Then edit `backend/.env` values as needed.
+
 ### Start full stack
 From project root:
 

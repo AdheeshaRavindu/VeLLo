@@ -9,7 +9,7 @@
 From project root:
 
 - `docker compose up --build`
-- Backend image includes Linux runtime libs required by OpenCV/MediaPipe (`libgl1`, `libglib2.0-0`).
+- Backend image includes Linux runtime libs required by OpenCV/MediaPipe (`libgl1`, `libglib2.0-0`, `libgles2`, `libegl1`).
 
 Backend will be available at:
 
