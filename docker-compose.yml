@@ -3,9 +3,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: signlang-backend
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
       PYTHONUNBUFFERED: "1"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -21,7 +21,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: signlang-frontend
     command: npm run dev -- --hostname 0.0.0.0 --port 3000
     working_dir: /app
     environment:
