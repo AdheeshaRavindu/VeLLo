@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 import cv2
-from mediapipe.python.solutions import hands
+from mediapipe.solutions import hands
 
 
 def image_paths_for_label(root_dir: Path, label: str) -> list[Path]:
