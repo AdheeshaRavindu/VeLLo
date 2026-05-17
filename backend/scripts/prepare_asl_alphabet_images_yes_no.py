@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 import cv2
-import mediapipe as mp
+from mediapipe.python.solutions import hands
 
 
 def image_paths_for_label(root_dir: Path, label: str) -> list[Path]:
@@ -40,7 +40,7 @@ def main() -> None:
     output_path = Path(args.output_jsonl).resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    hands = mp.solutions.hands.Hands(
+    hands_detector = hands.Hands(
         static_image_mode=True,
         max_num_hands=1,
         min_detection_confidence=0.1,
@@ -58,7 +58,7 @@ def main() -> None:
                     skipped += 1
                     continue
                 rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                results = hands.process(rgb)
+                results = hands_detector.process(rgb)
                 if not results.multi_hand_landmarks:
                     skipped += 1
                     continue
@@ -84,7 +84,7 @@ def main() -> None:
                 total_written += 1
                 per_label_counts[intent_label] += 1
 
-    hands.close()
+    hands_detector.close()
     print(f"Output: {output_path}")
     print(f"Total rows: {total_written}")
     print(f"Per-label: {per_label_counts}")
