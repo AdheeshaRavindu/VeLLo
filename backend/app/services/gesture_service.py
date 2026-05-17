@@ -155,8 +155,9 @@ def classify_gesture(
     _record_yes_motion_sample(landmarks[0][1], is_fist)
     yes_motion_debug: dict[str, float | int | bool] | None = None
 
-    # Priority ordering reduces collisions among similar open-hand signs.
-    if raised_fingers == 5 and spread_norm > 1.8:
+    # Keep "help" strict so random open-palm movement does not trigger it.
+    # The gesture must be a clearly spread open hand.
+    if raised_fingers == 5 and spread_norm > 2.15:
         return GestureResult(intent="emergency", confidence=min(0.95, conf_base + 0.2))
 
     if raised_fingers == 5 and spread_norm > 1.45:
