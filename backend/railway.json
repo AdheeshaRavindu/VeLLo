@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/railwayapp/railway/main/src/schemas/railway.json",
+  "build": {
+    "builder": "dockerfile",
+    "context": "backend"
+  },
+  "deploy": {
+    "startCommand": "uvicorn app.main:app --host 0.0.0.0 --port $PORT",
+    "restartPolicyType": "on_failure",
+    "restartPolicyMaxRetries": 5,
+    "numReplicas": 1
+  }
+}
