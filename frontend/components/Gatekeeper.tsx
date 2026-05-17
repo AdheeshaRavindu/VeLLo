@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, AudioLines, Lock, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type PermissionState = "idle" | "requesting" | "denied";
@@ -9,6 +8,29 @@ type PermissionState = "idle" | "requesting" | "denied";
 type GatekeeperProps = {
   onComplete?: () => void;
 };
+
+type IconProps = {
+  className?: string;
+  "aria-hidden"?: boolean;
+};
+
+const ArrowRight = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"->"}
+  </span>
+);
+
+const AudioLines = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"~"}
+  </span>
+);
+
+const Lock = ({ className, ...props }: IconProps) => (
+  <span className={className} {...props}>
+    {"#"}
+  </span>
+);
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

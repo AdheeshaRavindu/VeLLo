@@ -1,19 +1,17 @@
 export type Intent =
   | "yes"
   | "no"
-  | "i_need_help"
-  | "help"
   | "water"
-  | "medicine"
-  | "emergency"
   | "pain"
-  | "stop"
-  | "thank_you";
+  | "stop";
 
 export type CameraPermission = "idle" | "requesting" | "granted" | "denied" | "error";
 
 export interface DetectRequest {
-  image_base64: string;
+  image_base64?: string;
+  landmarks?: number[][];
+  handedness?: "Left" | "Right" | null;
+  handedness_score?: number;
   demo_intent?: Intent | null;
 }
 

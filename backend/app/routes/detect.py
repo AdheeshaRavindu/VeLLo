@@ -3,22 +3,13 @@ from fastapi import APIRouter
 from app.models.request_models import DetectRequest
 from app.models.response_models import DetectionResponse
 from app.services.classification_service import classify_intent
+from app.services.mediapipe_service import HandDetectionResult
 from app.services.mediapipe_service import mediapipe_service
 from app.services.phrase_mapper import map_intent_to_phrase
 from app.services.training_data_service import append_training_sample
 from app.utils.constants import INTENT_THRESHOLDS, SUPPORTED_INTENTS
 
 router = APIRouter(prefix="/api", tags=["detect"])
-INTENT_ALIASES: dict[str, str] = {
-    "help": "i_need_help",
-    "emergency": "i_need_help",
-}
-
-
-def _normalize_intent(intent: str | None) -> str | None:
-    if intent is None:
-        return None
-    return INTENT_ALIASES.get(intent, intent)
 
 
 @router.post("/detect", response_model=DetectionResponse)
@@ -59,7 +50,26 @@ def detect_sign(payload: DetectRequest) -> DetectionResponse:
             error=None,
         )
 
-    result = mediapipe_service.detect_hands(payload.image_base64)
+    if payload.landmarks and len(payload.landmarks) >= 21:
+        result = HandDetectionResult(
+            hand_detected=True,
+            confidence=max(0.7, float(payload.handedness_score)),
+            landmarks=payload.landmarks,
+            handedness=payload.handedness,
+            handedness_score=float(payload.handedness_score),
+            error=None,
+        )
+    elif payload.image_base64:
+        result = mediapipe_service.detect_hands(payload.image_base64)
+    else:
+        result = HandDetectionResult(
+            hand_detected=False,
+            confidence=0.0,
+            landmarks=[],
+            handedness=None,
+            handedness_score=0.0,
+            error="No landmarks or image payload provided",
+        )
     intent: str | None = None
     confidence = result.confidence
     phrase: str | None = None
@@ -74,7 +84,7 @@ def detect_sign(payload: DetectRequest) -> DetectionResponse:
         raw_intent = gesture_result.intent
         raw_confidence = gesture_result.confidence
         asl_yes_debug = gesture_result.debug
-        intent = _normalize_intent(raw_intent)
+        intent = raw_intent
         confidence = raw_confidence
 
         if intent and intent in SUPPORTED_INTENTS:
