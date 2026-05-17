@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import cv2
 import numpy as np
-from mediapipe.solutions import hands
+from mediapipe.python.solutions import hands
 
 
 @dataclass
