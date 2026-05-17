@@ -468,7 +468,7 @@ export default function StudioPage() {
               className={`relative transform-gpu transition-all duration-300 ${subtitleVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}
             >
               <div className="mb-1 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.16em] text-emerald-800/85 sm:text-xs">
-                <Captions className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                <Captions className="h-3.5 w-3.5 text-emerald-600" aria-hidden={true} />
                 {subtitleFrames[subtitleIndex].gloss}
               </div>
               <p className="text-center text-lg font-bold leading-tight text-emerald-950 antialiased sm:text-2xl lg:text-[1.65rem]">

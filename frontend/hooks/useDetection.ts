@@ -7,6 +7,7 @@ import type { TrackingSnapshot } from "@/hooks/useCamera";
 const POLL_INTERVAL_MS = 250;
 const MAX_FRAME_WIDTH = 640;
 const JPEG_QUALITY = 0.65;
+const HANDS_FREE_RESET_MS = 2000;
 
 interface UseDetectionProps {
   getTrackingSnapshot: () => TrackingSnapshot;

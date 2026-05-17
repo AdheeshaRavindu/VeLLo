@@ -126,7 +126,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               <span className="flex items-center gap-1 sm:gap-1.5">
                 <AudioLines
                   className={`h-3 w-3 text-emerald-600 sm:h-3.5 sm:w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
-                  aria-hidden="true"
+                  aria-hidden={true}
                 />
                 Listening...
               </span>
@@ -166,12 +166,12 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
                   </span>
                 </span>
               </span>
-              <ArrowRight className="h-4 w-4 text-emerald-800 transition duration-300 group-hover:translate-x-1.5 sm:h-5 sm:w-5" aria-hidden="true" />
+              <ArrowRight className="h-4 w-4 text-emerald-800 transition duration-300 group-hover:translate-x-1.5 sm:h-5 sm:w-5" aria-hidden={true} />
             </span>
           </button>
 
           <p className="mt-2 inline-flex max-w-[320px] items-start gap-1.5 text-center text-[11px] text-emerald-800/75 sm:max-w-none sm:items-center sm:gap-2 sm:text-xs lg:mt-1">
-            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700 sm:mt-0" aria-hidden="true" />
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700 sm:mt-0" aria-hidden={true} />
             A browser popup will appear next. Please click &quot;Allow&quot; to start.
           </p>
         </div>
