@@ -2,8 +2,8 @@ import base64
 from dataclasses import dataclass
 
 import cv2
-import mediapipe as mp
 import numpy as np
+from mediapipe.python.solutions import hands
 
 
 @dataclass
@@ -16,7 +16,7 @@ class HandDetectionResult:
 
 class MediaPipeService:
     def __init__(self) -> None:
-        self._hands = mp.solutions.hands.Hands(
+        self._hands = hands.Hands(
             static_image_mode=False,
             max_num_hands=1,
             model_complexity=0,
