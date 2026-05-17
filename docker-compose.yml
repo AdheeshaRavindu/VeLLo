@@ -3,7 +3,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: signlang-backend
     env_file:
       - ./backend/.env
     environment:
@@ -21,7 +20,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: signlang-frontend
     command: npm run dev -- --hostname 0.0.0.0 --port 3000
     working_dir: /app
     environment:
