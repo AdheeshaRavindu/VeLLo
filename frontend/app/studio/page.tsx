@@ -5,6 +5,7 @@ import { detectSign, synthesizeVoice } from "@/services/api";
 import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
 import type { Intent } from "@/types";
 
+<<<<<<< HEAD
 type IconProps = {
   className?: string;
   "aria-hidden"?: boolean;
@@ -51,6 +52,10 @@ const Volume2 = ({ className, ...props }: IconProps) => (
     {"O"}
   </span>
 );
+=======
+const STUDIO_STABILITY_FRAMES = 2;
+const STUDIO_NO_HAND_RESET_FRAMES = 1;
+>>>>>>> aff2e40 (last)
 
 export default function StudioPage() {
   const NO_HAND_RESET_MS = 700;
@@ -61,9 +66,16 @@ export default function StudioPage() {
   const lastSpokenTextRef = useRef<string>("");
   const lastSpokenAtRef = useRef<number>(0);
   const inFlightRef = useRef(false);
+<<<<<<< HEAD
   const noHandSinceRef = useRef<number | null>(null);
   const lastRecognitionKeyRef = useRef<string>("");
   const lastRecognitionAtRef = useRef<number>(0);
+=======
+  const pendingIntentRef = useRef<Intent | null>(null);
+  const pendingCountRef = useRef(0);
+  const emittedIntentRef = useRef<Intent | null>(null);
+  const noHandCountRef = useRef(0);
+>>>>>>> aff2e40 (last)
 
   const [cameraStatus, setCameraStatus] = useState<"loading" | "ready" | "denied">(
     "loading",
@@ -193,14 +205,14 @@ export default function StudioPage() {
       canvasRef.current = document.createElement("canvas");
     }
     const canvas = canvasRef.current;
-    const width = Math.min(960, video.videoWidth);
+    const width = Math.min(720, video.videoWidth);
     const scale = width / video.videoWidth;
     canvas.width = width;
     canvas.height = Math.round(video.videoHeight * scale);
     const context = canvas.getContext("2d");
     if (!context) return null;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.8);
+    return canvas.toDataURL("image/jpeg", 0.62);
   }, []);
 
   useEffect(() => {
@@ -262,10 +274,38 @@ export default function StudioPage() {
         setHandDetected(result.hand_detected);
         setConfidence(result.confidence ?? 0);
         if (result.intent && result.phrase) {
+<<<<<<< HEAD
           noHandSinceRef.current = null;
           updateRecognition(result.intent, result.phrase, result.confidence);
           void speakPhrase(result.phrase);
+=======
+          noHandCountRef.current = 0;
+          if (pendingIntentRef.current === result.intent) {
+            pendingCountRef.current += 1;
+          } else {
+            pendingIntentRef.current = result.intent;
+            pendingCountRef.current = 1;
+          }
+
+          const isStable = pendingCountRef.current >= STUDIO_STABILITY_FRAMES;
+          const isDuplicateStillPose = emittedIntentRef.current === result.intent;
+          if (isStable && !isDuplicateStillPose) {
+            emittedIntentRef.current = result.intent;
+            updateRecognition(result.intent, result.phrase, result.confidence);
+            void speakPhrase(result.phrase);
+          }
+>>>>>>> aff2e40 (last)
         } else {
+          pendingIntentRef.current = null;
+          pendingCountRef.current = 0;
+          if (!result.hand_detected) {
+            noHandCountRef.current += 1;
+            if (noHandCountRef.current >= STUDIO_NO_HAND_RESET_FRAMES) {
+              emittedIntentRef.current = null;
+            }
+          } else {
+            noHandCountRef.current = 0;
+          }
           setIsSpeaking(false);
           if (!result.hand_detected) {
             const now = Date.now();
@@ -293,7 +333,7 @@ export default function StudioPage() {
         }
         inFlightRef.current = false;
       }
-    }, 320);
+    }, 140);
 
     return () => {
       cancelled = true;

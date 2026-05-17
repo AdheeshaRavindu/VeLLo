@@ -4,9 +4,17 @@ import { detectSign } from "@/services/api";
 import type { DetectionResponse, Intent } from "@/types";
 import type { TrackingSnapshot } from "@/hooks/useCamera";
 
+<<<<<<< HEAD
 const POLL_INTERVAL_MS = 250;
 const MAX_FRAME_WIDTH = 640;
 const JPEG_QUALITY = 0.65;
+=======
+const POLL_INTERVAL_MS = 120;
+const MAX_FRAME_WIDTH = 640;
+const JPEG_QUALITY = 0.6;
+const LIVE_STABILITY_FRAMES = 2;
+const NO_HAND_RESET_FRAMES = 1;
+>>>>>>> aff2e40 (last)
 
 interface UseDetectionProps {
   getTrackingSnapshot: () => TrackingSnapshot;
@@ -27,6 +35,8 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
   const [error, setError] = useState<string | null>(null);
   const stableIntentRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
+  const latchedIntentRef = useRef<string | null>(null);
+  const noHandCountRef = useRef(0);
   const inFlightRef = useRef(false);
   const gestureLockedRef = useRef(false);
   const handsFreeSinceRef = useRef<number | null>(null);
@@ -98,8 +108,23 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
           demo_intent: intent,
         });
 
+<<<<<<< HEAD
         // Require two consecutive same intents before showing phrase in live mode.
+=======
+        // Gate noisy early frames and avoid repeating the same intent while the hand remains still.
+>>>>>>> aff2e40 (last)
         if (!intent) {
+          if (!result.hand_detected) {
+            noHandCountRef.current += 1;
+            if (noHandCountRef.current >= NO_HAND_RESET_FRAMES) {
+              latchedIntentRef.current = null;
+              stableIntentRef.current = null;
+              stableCountRef.current = 0;
+            }
+          } else {
+            noHandCountRef.current = 0;
+          }
+
           if (result.intent && result.intent === stableIntentRef.current) {
             stableCountRef.current += 1;
           } else if (result.intent) {
@@ -110,9 +135,20 @@ export function useDetection({ getTrackingSnapshot, enabled }: UseDetectionProps
             stableCountRef.current = 0;
           }
 
+<<<<<<< HEAD
           if (result.intent && stableCountRef.current < 2) {
+=======
+          const isStable = Boolean(result.intent) && stableCountRef.current >= LIVE_STABILITY_FRAMES;
+          const isDuplicateLatchedIntent =
+            Boolean(result.intent) &&
+            result.intent === latchedIntentRef.current &&
+            result.hand_detected;
+
+          if (!isStable || isDuplicateLatchedIntent) {
+>>>>>>> aff2e40 (last)
             setDetection({ ...result, intent: null, phrase: null });
           } else {
+            latchedIntentRef.current = result.intent;
             setDetection(result);
             if (result.intent) {
               gestureLockedRef.current = true;

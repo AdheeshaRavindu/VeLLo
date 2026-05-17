@@ -12,7 +12,7 @@ class GestureResult:
 
 FINGER_TIPS = [4, 8, 12, 16, 20]
 FINGER_PIPS = [3, 6, 10, 14, 18]
-ASL_YES_WINDOW_SECONDS = 1.6
+ASL_YES_WINDOW_SECONDS = 1.1
 ASL_YES_MIN_FIST_SAMPLES = 3
 ASL_YES_DIRECTION_EPSILON = 0.012
 ASL_YES_MIN_AMPLITUDE = 0.045
@@ -177,14 +177,6 @@ def classify_gesture(
 
     if raised_fingers == 4 and not thumb_up:
         return GestureResult(intent="stop", confidence=min(0.92, conf_base + 0.14))
-
-    if raised_fingers == 0 and is_fist:
-        # Fallback for static ASL "yes" (closed fist) when motion cue is weak.
-        return GestureResult(
-            intent="yes",
-            confidence=min(0.86, conf_base + 0.04),
-            debug=yes_motion_debug,
-        )
 
     if index_up and middle_up and not ring_up and not pinky_up and not thumb_up:
         return GestureResult(intent="medicine", confidence=min(0.92, conf_base + 0.13))
