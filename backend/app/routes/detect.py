@@ -3,8 +3,7 @@ from fastapi import APIRouter
 from app.models.request_models import DetectRequest
 from app.models.response_models import DetectionResponse
 from app.services.classification_service import classify_intent
-from app.services.mediapipe_service import HandDetectionResult
-from app.services.mediapipe_service import mediapipe_service
+from app.services.mediapipe_service import HandDetectionResult, get_mediapipe_service
 from app.services.phrase_mapper import map_intent_to_phrase
 from app.services.training_data_service import append_training_sample
 from app.utils.constants import INTENT_THRESHOLDS, SUPPORTED_INTENTS
@@ -60,7 +59,7 @@ def detect_sign(payload: DetectRequest) -> DetectionResponse:
             error=None,
         )
     elif payload.image_base64:
-        result = mediapipe_service.detect_hands(payload.image_base64)
+        result = get_mediapipe_service().detect_hands(payload.image_base64)
     else:
         result = HandDetectionResult(
             hand_detected=False,

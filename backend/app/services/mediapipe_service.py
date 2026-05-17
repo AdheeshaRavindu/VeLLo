@@ -15,6 +15,8 @@ class HandDetectionResult:
     hand_detected: bool
     confidence: float
     landmarks: list[list[float]]
+    handedness: str | None = None
+    handedness_score: float = 0.0
     error: str | None = None
 
 
@@ -87,14 +89,38 @@ class MediaPipeService:
         for point in results.hand_landmarks[0]:
             landmarks.append([float(point.x), float(point.y), float(point.z)])
 
-        # Get confidence from hand_world_landmarks or use a default
+        # Get confidence and handedness from results
         confidence = 0.9
+        handedness = None
+        handedness_score = 0.0
+        
         if results.handedness and len(results.handedness) > 0:
             # Handedness contains classification results with score
-            confidence = float(results.handedness[0].score)
+            handedness_classification = results.handedness[0]
+            handedness = handedness_classification.category_name  # "Left" or "Right"
+            handedness_score = float(handedness_classification.score)
+            confidence = handedness_score
 
-        return HandDetectionResult(hand_detected=True, confidence=confidence, landmarks=landmarks)
+        return HandDetectionResult(
+            hand_detected=True, 
+            confidence=confidence, 
+            landmarks=landmarks,
+            handedness=handedness,
+            handedness_score=handedness_score
+        )
 
 
-mediapipe_service = MediaPipeService()
+# Lazy initialization - only create when first needed
+_mediapipe_service = None
+
+
+def get_mediapipe_service() -> "MediaPipeService":
+    global _mediapipe_service
+    if _mediapipe_service is None:
+        _mediapipe_service = MediaPipeService()
+    return _mediapipe_service
+
+
+# For backwards compatibility, provide a property-like singleton
+mediapipe_service = None
 
