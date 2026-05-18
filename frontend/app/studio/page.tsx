@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import { detectSign, synthesizeVoice } from "@/services/api";
 import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
 import type { Intent } from "@/types";
@@ -52,11 +53,14 @@ const Volume2 = ({ className, ...props }: IconProps) => (
   </span>
 );
 
+const STUDIO_HAND_MODEL_URL =
+  "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+
 export default function StudioPage() {
   const NO_HAND_RESET_MS = 700;
   const FEED_DUPLICATE_WINDOW_MS = 2000;
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastSpokenTextRef = useRef<string>("");
   const lastSpokenAtRef = useRef<number>(0);
@@ -184,27 +188,9 @@ export default function StudioPage() {
     }
   }, []);
 
-  const captureFrame = useCallback((): string | null => {
-    const video = videoRef.current;
-    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
-      return null;
-    }
-    if (!canvasRef.current) {
-      canvasRef.current = document.createElement("canvas");
-    }
-    const canvas = canvasRef.current;
-    const width = Math.min(960, video.videoWidth);
-    const scale = width / video.videoWidth;
-    canvas.width = width;
-    canvas.height = Math.round(video.videoHeight * scale);
-    const context = canvas.getContext("2d");
-    if (!context) return null;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.8);
-  }, []);
-
   useEffect(() => {
     let stream: MediaStream | null = null;
+    let cancelled = false;
 
     const startCamera = async () => {
       try {
@@ -222,17 +208,39 @@ export default function StudioPage() {
           await videoRef.current.play();
         }
 
-        setCameraStatus("ready");
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
+        );
+        if (cancelled) return;
+        handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: STUDIO_HAND_MODEL_URL },
+          runningMode: "VIDEO",
+          numHands: 1,
+          minHandDetectionConfidence: 0.5,
+          minHandPresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+        if (!cancelled) {
+          setCameraStatus("ready");
+        }
       } catch {
-        setCameraStatus("denied");
+        if (!cancelled) {
+          setCameraStatus("denied");
+          setDetectionError("Camera or hand tracker failed to start.");
+        }
       }
     };
 
-    startCamera();
+    void startCamera();
 
     return () => {
+      cancelled = true;
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
+      }
+      if (handLandmarkerRef.current) {
+        handLandmarkerRef.current.close();
+        handLandmarkerRef.current = null;
       }
       if (audioRef.current) {
         audioRef.current.pause();
@@ -249,15 +257,46 @@ export default function StudioPage() {
       if (cancelled || inFlightRef.current) {
         return;
       }
-      const image = captureFrame();
-      if (!image) {
+      const video = videoRef.current;
+      const handLandmarker = handLandmarkerRef.current;
+      if (!video || !handLandmarker || video.readyState < 2) {
         return;
       }
+
+      const handResult = handLandmarker.detectForVideo(video, performance.now());
+      const hasHand = handResult.landmarks.length > 0;
+
+      if (!hasHand) {
+        setHandDetected(false);
+        setConfidence(0);
+        setIsSpeaking(false);
+        setDetectionError(null);
+        const now = Date.now();
+        if (noHandSinceRef.current === null) {
+          noHandSinceRef.current = now;
+        }
+        if (now - noHandSinceRef.current >= NO_HAND_RESET_MS) {
+          resetRecognitionToIdle();
+        }
+        return;
+      }
+
+      noHandSinceRef.current = null;
+      const primary = handResult.landmarks[0];
+      const landmarks = primary.map((point) => [point.x, point.y, point.z]);
+      const handednessCategory = handResult.handednesses[0]?.[0];
+      const handedness = (handednessCategory?.categoryName as "Left" | "Right" | undefined) ?? null;
+      const handedness_score = handednessCategory?.score ?? 0;
+
       inFlightRef.current = true;
       setIsDetecting(true);
       setDetectionError(null);
       try {
-        const result = await detectSign({ image_base64: image });
+        const result = await detectSign({
+          landmarks,
+          handedness,
+          handedness_score,
+        });
         if (cancelled) return;
         setHandDetected(result.hand_detected);
         setConfidence(result.confidence ?? 0);
@@ -282,9 +321,11 @@ export default function StudioPage() {
             setDetectionError(result.error);
           }
         }
-      } catch {
+      } catch (err) {
         if (!cancelled) {
-          setDetectionError("Detection request failed");
+          setDetectionError(
+            err instanceof Error ? err.message : "Detection request failed",
+          );
           setHandDetected(false);
         }
       } finally {
@@ -299,7 +340,7 @@ export default function StudioPage() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [cameraStatus, captureFrame, resetRecognitionToIdle, speakPhrase, updateRecognition]);
+  }, [cameraStatus, resetRecognitionToIdle, speakPhrase, updateRecognition]);
 
   useEffect(() => {
     const audio = audioRef.current;
