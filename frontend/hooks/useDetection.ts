@@ -7,7 +7,8 @@ import type { DetectionResponse, Intent } from "@/types";
 const POLL_INTERVAL_MS = 250;
 const MAX_FRAME_WIDTH = 800;
 const JPEG_QUALITY = 0.75;
-const LIVE_STABILITY_FRAMES = 2;
+const LIVE_STABILITY_FRAMES = 3;
+const LIVE_INTENT_HOLD_MS = 1200;
 
 interface UseDetectionProps {
   videoRef: RefObject<HTMLVideoElement>;
@@ -29,6 +30,8 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stableIntentRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
+  const lastAcceptedRef = useRef<DetectionResponse | null>(null);
+  const lastAcceptedAtRef = useRef(0);
   const inFlightRef = useRef(false);
 
   const captureFrame = useCallback((): string | null => {
@@ -78,8 +81,8 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
           demo_intent: intent,
         });
 
-        // Single-sign mode: surface detections immediately to avoid hiding valid "yes" frames.
         if (!intent) {
+          const now = Date.now();
           if (result.intent && result.intent === stableIntentRef.current) {
             stableCountRef.current += 1;
           } else if (result.intent) {
@@ -90,13 +93,30 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
             stableCountRef.current = 0;
           }
 
-          if (result.intent && stableCountRef.current < LIVE_STABILITY_FRAMES) {
-            setDetection({ ...result, intent: null, phrase: null });
-          } else {
+          if (result.intent && stableCountRef.current >= LIVE_STABILITY_FRAMES) {
             setDetection(result);
+            lastAcceptedRef.current = result;
+            lastAcceptedAtRef.current = now;
+          } else {
+            const hasRecentAccepted =
+              lastAcceptedRef.current !== null && now - lastAcceptedAtRef.current <= LIVE_INTENT_HOLD_MS;
+            if (hasRecentAccepted) {
+              setDetection({
+                ...lastAcceptedRef.current,
+                hand_detected: result.hand_detected,
+                confidence: result.confidence,
+                detector_confidence: result.detector_confidence,
+                handedness: result.handedness,
+                handedness_score: result.handedness_score,
+              });
+            } else {
+              setDetection({ ...result, intent: null, phrase: null });
+            }
           }
         } else {
           setDetection(result);
+          lastAcceptedRef.current = result;
+          lastAcceptedAtRef.current = Date.now();
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Detection failed");

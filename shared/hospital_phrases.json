@@ -1,13 +1,9 @@
 {
   "yes": "Yes.",
   "no": "No.",
-  "i_need_help": "I need help.",
-  "help": "Please help me.",
-  "water": "I need water.",
-  "medicine": "I need medicine.",
-  "emergency": "This is an emergency.",
   "pain": "I am in pain.",
-  "stop": "Please stop.",
-  "thank_you": "Thank you."
+  "water": "I need water.",
+  "help": "Please help me.",
+  "stop": "Please stop."
 }
 

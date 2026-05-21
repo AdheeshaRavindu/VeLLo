@@ -12,7 +12,7 @@ import { useCamera } from "@/hooks/useCamera";
 import { useDetection } from "@/hooks/useDetection";
 import type { Intent } from "@/types";
 
-const MIN_OUTPUT_CONFIDENCE = 0.9;
+const DEFAULT_OUTPUT_CONFIDENCE = 0.72;
 type OutputSuppressionReason = "no_phrase_from_backend" | "confidence_below_display_gate" | null;
 
 export default function DetectPage() {
@@ -32,13 +32,12 @@ export default function DetectPage() {
   };
 
   const confidence = detection?.confidence ?? 0;
-  const hasDisplayConfidence = confidence >= MIN_OUTPUT_CONFIDENCE;
-  const outputPhrase = hasDisplayConfidence
-    ? detection?.phrase ?? detection?.intent ?? null
-    : null;
+  const displayThreshold = detection?.acceptance_threshold ?? DEFAULT_OUTPUT_CONFIDENCE;
+  const hasDisplayConfidence = confidence >= displayThreshold;
+  const outputPhrase = hasDisplayConfidence ? detection?.phrase ?? detection?.intent ?? null : null;
   let outputSuppressionReason: OutputSuppressionReason = null;
   if (detection && !outputPhrase) {
-    if (confidence < MIN_OUTPUT_CONFIDENCE) {
+    if (confidence < displayThreshold) {
       outputSuppressionReason = "confidence_below_display_gate";
     } else {
       outputSuppressionReason = "no_phrase_from_backend";
@@ -106,7 +105,7 @@ export default function DetectPage() {
           <PhraseCard
             phrase={outputPhrase}
             confidence={confidence}
-            displayThreshold={MIN_OUTPUT_CONFIDENCE}
+            displayThreshold={displayThreshold}
             suppressionReason={outputSuppressionReason}
           />
           <AudioPlayer phrase={outputPhrase} />

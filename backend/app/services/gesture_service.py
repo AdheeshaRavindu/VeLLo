@@ -155,13 +155,6 @@ def classify_gesture(
     _record_yes_motion_sample(landmarks[0][1], is_fist)
     yes_motion_debug: dict[str, float | int | bool] | None = None
 
-    # Priority ordering reduces collisions among similar open-hand signs.
-    if raised_fingers == 5 and spread_norm > 1.8:
-        return GestureResult(intent="emergency", confidence=min(0.95, conf_base + 0.2))
-
-    if raised_fingers == 5 and spread_norm > 1.45:
-        return GestureResult(intent="help", confidence=min(0.92, conf_base + 0.15))
-
     if is_fist:
         asl_yes_detected, motion_score, yes_debug = _detect_asl_yes_motion()
         yes_motion_debug = yes_debug
@@ -174,9 +167,6 @@ def classify_gesture(
                 debug=yes_debug,
             )
 
-    if raised_fingers == 4 and not thumb_up:
-        return GestureResult(intent="stop", confidence=min(0.92, conf_base + 0.14))
-
     if raised_fingers == 0 and is_fist:
         # Fallback for static ASL "yes" (closed fist) when motion cue is weak.
         return GestureResult(
@@ -185,23 +175,31 @@ def classify_gesture(
             debug=yes_motion_debug,
         )
 
-    if index_up and middle_up and not ring_up and not pinky_up and not thumb_up:
-        return GestureResult(intent="medicine", confidence=min(0.92, conf_base + 0.13))
+    # Open-hand help gesture.
+    if raised_fingers == 5 and spread_norm > 1.45:
+        return GestureResult(intent="help", confidence=min(0.92, conf_base + 0.15))
 
-    if index_up and not middle_up and not ring_up and not pinky_up and not thumb_up:
-        return GestureResult(intent="doctor", confidence=min(0.9, conf_base + 0.12))
+    # Four fingers up, thumb tucked.
+    if raised_fingers == 4 and not thumb_up:
+        return GestureResult(intent="stop", confidence=min(0.92, conf_base + 0.14))
 
+    # Thumb-only gesture.
     if thumb_up and not index_up and not middle_up and not ring_up and not pinky_up:
-        return GestureResult(intent="water", confidence=min(0.92, conf_base + 0.12))
+        return GestureResult(intent="water", confidence=min(0.9, conf_base + 0.12))
 
+    # Thumb+index gesture.
     if thumb_up and index_up and not middle_up and not ring_up and not pinky_up:
         return GestureResult(intent="pain", confidence=min(0.92, conf_base + 0.11))
 
-    if index_up and not middle_up and not ring_up and pinky_up:
-        return GestureResult(intent="no", confidence=min(0.92, conf_base + 0.12))
+    # "No" variants: keep strict to avoid overlap with pain/water.
+    if index_up and middle_up and not ring_up and not pinky_up and not thumb_up:
+        return GestureResult(intent="no", confidence=min(0.87, conf_base + 0.1))
 
-    if thumb_up and index_up and middle_up and not ring_up and not pinky_up:
-        return GestureResult(intent="thank_you", confidence=min(0.92, conf_base + 0.11))
+    if index_up and not middle_up and not ring_up and not pinky_up and not thumb_up:
+        return GestureResult(intent="no", confidence=min(0.9, conf_base + 0.12))
+
+    if index_up and not middle_up and not ring_up and pinky_up and not thumb_up:
+        return GestureResult(intent="no", confidence=min(0.92, conf_base + 0.12))
 
     return GestureResult(intent=None, confidence=0.0)
 

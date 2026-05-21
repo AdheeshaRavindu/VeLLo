@@ -3,13 +3,10 @@ import type { Intent } from "@/types";
 const DEMO_INTENTS: Intent[] = [
   "yes",
   "no",
-  "help",
-  "water",
-  "medicine",
-  "emergency",
   "pain",
+  "water",
+  "help",
   "stop",
-  "thank_you",
 ];
 
 interface DemoButtonsProps {

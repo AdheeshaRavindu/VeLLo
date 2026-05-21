@@ -1,9 +1,4 @@
-import type {
-  DetectRequest,
-  DetectionResponse,
-  VoiceRequest,
-  VoiceResponse,
-} from "@/types";
+import type { DetectRequest, DetectionResponse, VoiceRequest, VoiceResponse } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -15,7 +10,18 @@ async function postJson<TResponse, TBody>(path: string, body: TBody): Promise<TR
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed (${response.status})`);
+    let detail = "";
+    try {
+      const payload = (await response.json()) as { detail?: string | { msg?: string }[] };
+      if (typeof payload.detail === "string") {
+        detail = payload.detail;
+      } else if (Array.isArray(payload.detail) && payload.detail[0]?.msg) {
+        detail = payload.detail[0].msg;
+      }
+    } catch {
+      // Keep default message if response is not JSON.
+    }
+    throw new Error(detail ? `Request failed (${response.status}): ${detail}` : `Request failed (${response.status})`);
   }
 
   return (await response.json()) as TResponse;
