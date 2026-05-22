@@ -30,8 +30,6 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stableIntentRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
-  const lastAcceptedRef = useRef<DetectionResponse | null>(null);
-  const lastAcceptedAtRef = useRef(0);
   const inFlightRef = useRef(false);
 
   const captureFrame = useCallback((): string | null => {
@@ -83,9 +81,9 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
 
         if (!intent) {
           const now = Date.now();
-          if (result.intent && result.intent === stableIntentRef.current) {
+          if (result.intent && result.intent !== "unknown" && result.intent === stableIntentRef.current) {
             stableCountRef.current += 1;
-          } else if (result.intent) {
+          } else if (result.intent && result.intent !== "unknown") {
             stableIntentRef.current = result.intent;
             stableCountRef.current = 1;
           } else {
@@ -93,30 +91,13 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
             stableCountRef.current = 0;
           }
 
-          if (result.intent && stableCountRef.current >= LIVE_STABILITY_FRAMES) {
+          if (result.intent && result.intent !== "unknown" && stableCountRef.current >= LIVE_STABILITY_FRAMES) {
             setDetection(result);
-            lastAcceptedRef.current = result;
-            lastAcceptedAtRef.current = now;
           } else {
-            const hasRecentAccepted =
-              lastAcceptedRef.current !== null && now - lastAcceptedAtRef.current <= LIVE_INTENT_HOLD_MS;
-            if (hasRecentAccepted) {
-              setDetection({
-                ...lastAcceptedRef.current,
-                hand_detected: result.hand_detected,
-                confidence: result.confidence,
-                detector_confidence: result.detector_confidence,
-                handedness: result.handedness,
-                handedness_score: result.handedness_score,
-              });
-            } else {
-              setDetection({ ...result, intent: null, phrase: null });
-            }
+            setDetection({ ...result, intent: null, phrase: null });
           }
         } else {
           setDetection(result);
-          lastAcceptedRef.current = result;
-          lastAcceptedAtRef.current = Date.now();
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Detection failed");
@@ -144,6 +125,10 @@ export function useDetection({ videoRef, enabled }: UseDetectionProps): UseDetec
 
   useEffect(() => {
     if (!enabled) {
+      stableIntentRef.current = null;
+      stableCountRef.current = 0;
+      inFlightRef.current = false;
+      setIsDetecting(false);
       return;
     }
     let timer: number | undefined;

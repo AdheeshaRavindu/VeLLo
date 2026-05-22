@@ -15,6 +15,9 @@ class HandDetectionResult:
     landmarks: list[list[float]]
     handedness: str | None = None
     handedness_score: float = 0.0
+    secondary_landmarks: list[list[float]] | None = None
+    secondary_handedness: str | None = None
+    secondary_handedness_score: float = 0.0
     error: str | None = None
 
 
@@ -115,12 +118,26 @@ class MediaPipeService:
                     for point in primary_points
                 ]
 
+                secondary_landmarks: list[list[float]] | None = None
+                if len(results.multi_hand_landmarks) > 1:
+                    secondary_points = results.multi_hand_landmarks[1].landmark
+                    secondary_landmarks = [
+                        [float(point.x), float(point.y), float(point.z)]
+                        for point in secondary_points
+                    ]
+
                 handedness_label: str | None = None
                 handedness_score = 0.0
+                secondary_handedness_label: str | None = None
+                secondary_handedness_score = 0.0
                 if results.multi_handedness:
                     classification = results.multi_handedness[0].classification[0]
                     handedness_label = str(classification.label)
                     handedness_score = float(classification.score)
+                    if len(results.multi_handedness) > 1:
+                        secondary_classification = results.multi_handedness[1].classification[0]
+                        secondary_handedness_label = str(secondary_classification.label)
+                        secondary_handedness_score = float(secondary_classification.score)
 
                 return HandDetectionResult(
                     hand_detected=True,
@@ -128,6 +145,9 @@ class MediaPipeService:
                     landmarks=landmarks,
                     handedness=handedness_label,
                     handedness_score=handedness_score,
+                    secondary_landmarks=secondary_landmarks,
+                    secondary_handedness=secondary_handedness_label,
+                    secondary_handedness_score=secondary_handedness_score,
                 )
 
             if self._landmarker is None:
@@ -157,12 +177,26 @@ class MediaPipeService:
                 for point in primary_points
             ]
 
+            secondary_landmarks: list[list[float]] | None = None
+            if len(task_results.hand_landmarks) > 1:
+                secondary_points = task_results.hand_landmarks[1]
+                secondary_landmarks = [
+                    [float(point.x), float(point.y), float(point.z)]
+                    for point in secondary_points
+                ]
+
             handedness_label: str | None = None
             handedness_score = 0.0
+            secondary_handedness_label: str | None = None
+            secondary_handedness_score = 0.0
             if task_results.handedness and task_results.handedness[0]:
                 category = task_results.handedness[0][0]
                 handedness_label = str(category.category_name)
                 handedness_score = float(category.score)
+                if len(task_results.handedness) > 1 and task_results.handedness[1]:
+                    secondary_category = task_results.handedness[1][0]
+                    secondary_handedness_label = str(secondary_category.category_name)
+                    secondary_handedness_score = float(secondary_category.score)
 
             return HandDetectionResult(
                 hand_detected=True,
@@ -170,6 +204,9 @@ class MediaPipeService:
                 landmarks=landmarks,
                 handedness=handedness_label,
                 handedness_score=handedness_score,
+                secondary_landmarks=secondary_landmarks,
+                secondary_handedness=secondary_handedness_label,
+                secondary_handedness_score=secondary_handedness_score,
             )
         except Exception:
             return HandDetectionResult(

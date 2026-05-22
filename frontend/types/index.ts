@@ -16,9 +16,13 @@ export interface DetectRequest {
 export interface DetectionResponse {
   hand_detected: boolean;
   confidence: number;
-  intent: Intent | null;
+  intent: Intent | "unknown" | null;
   phrase: string | null;
   source: "vision" | "demo";
+  handedness?: string | null;
+  handedness_score?: number | null;
+  detector_confidence?: number | null;
+  debug_landmarks?: number[][] | null;
   raw_intent?: string | null;
   raw_confidence?: number | null;
   accepted_intent?: string | null;
@@ -26,6 +30,7 @@ export interface DetectionResponse {
   accepted_phrase_available?: boolean | null;
   suppression_reason?: string | null;
   asl_yes_debug?: Record<string, number | boolean> | null;
+  capture_saved?: boolean;
   error?: string | null;
 }
 

@@ -14,6 +14,7 @@ interface UseCameraResult {
 export function useCamera(): UseCameraResult {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const startPromiseRef = useRef<Promise<void> | null>(null);
   const [permission, setPermission] = useState<CameraPermission>("idle");
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -28,13 +29,24 @@ export function useCamera(): UseCameraResult {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    startPromiseRef.current = null;
     setIsReady(false);
   }, []);
 
   const startCamera = useCallback(async () => {
+    if (streamRef.current) {
+      setPermission("granted");
+      setIsReady(true);
+      return;
+    }
+
+    if (startPromiseRef.current) {
+      return startPromiseRef.current;
+    }
+
     setPermission("requesting");
     setError(null);
-    try {
+    const startPromise = (async () => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "user",
@@ -52,7 +64,21 @@ export function useCamera(): UseCameraResult {
 
       setPermission("granted");
       setIsReady(true);
+    })();
+
+    startPromiseRef.current = startPromise;
+
+    try {
+      await startPromise;
     } catch (err) {
+      startPromiseRef.current = null;
+      const failedStream = streamRef.current as MediaStream | null;
+      if (failedStream !== null) {
+        for (const track of failedStream.getTracks()) {
+          track.stop();
+        }
+        streamRef.current = null;
+      }
       setIsReady(false);
       if (err instanceof DOMException && err.name === "NotAllowedError") {
         setPermission("denied");

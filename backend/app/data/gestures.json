@@ -1,43 +1,63 @@
 {
   "asl_open_palm": {
     "description": "ASL-inspired open palm",
-    "intent": "help"
+    "intent": "help",
+    "canonical_asl": "HELP",
+    "canonical_description": "Form a loose-thumb 'A' (or 'S') hand and lift it with the other hand; directional to indicate who is helping. (Lifeprint)"
   },
   "asl_thumb_up": {
     "description": "ASL-inspired thumb up",
-    "intent": "water"
+    "intent": "water",
+    "canonical_asl": "WATER",
+    "canonical_description": "Form a 'W' handshape and tap the index finger to the mouth twice. (Lifeprint)"
   },
   "asl_index_up": {
     "description": "ASL-inspired index finger up",
-    "intent": "doctor"
+    "intent": "doctor",
+    "canonical_asl": "DOCTOR",
+    "canonical_description": "Tap the fingertips of the dominant 'bent' hand on the upturned wrist of the base hand (pulse area). (Lifeprint)"
   },
   "asl_index_middle_up": {
     "description": "ASL-inspired index and middle up",
-    "intent": "medicine"
+    "intent": "medicine",
+    "canonical_asl": "MEDICINE",
+    "canonical_description": "Touch the middle finger of the dominant hand to the palm of the other hand and pivot side-to-side. (Lifeprint)"
   },
   "asl_open_palm_spread": {
     "description": "ASL-inspired open palm with wide finger spread",
-    "intent": "emergency"
+    "intent": "emergency",
+    "canonical_asl": "EMERGENCY",
+    "canonical_description": "Shake an 'E' handshape frantically from side to side to indicate 'emergency'. (Lifeprint)"
   },
   "asl_fist": {
     "description": "ASL-inspired closed fist",
-    "intent": "pain"
+    "intent": "pain",
+    "canonical_asl": "HURT/PAIN",
+    "canonical_description": "Extend the index fingers of both hands and jab/twist them toward each other (or near the painful location). (Lifeprint)"
   },
   "asl_thumb_index_pinch": {
     "description": "ASL-inspired thumb-index pinch",
-    "intent": "yes"
+    "intent": "yes",
+    "canonical_asl": "YES",
+    "canonical_description": "Use an 'S' (fist) handshape and nod the wrist up-and-down to mimic a head nod for 'yes'. (Lifeprint)"
   },
   "asl_index_pinky_up": {
     "description": "ASL-inspired index and pinky up",
-    "intent": "no"
+    "intent": "no",
+    "canonical_asl": "NO",
+    "canonical_description": "Bring the index and middle fingers to the thumb (pinch motion) or use a small side-to-side motion; often accompanied by a headshake. (Lifeprint)"
   },
   "asl_stop_palm_no_thumb": {
     "description": "ASL-inspired stop hand (four fingers up, thumb tucked)",
-    "intent": "stop"
+    "intent": "stop",
+    "canonical_asl": "STOP",
+    "canonical_description": "Extend one palm up and sharply bring the other open hand down to it at a right angle (chop). (Lifeprint)"
   },
   "asl_thumb_index_middle_up": {
     "description": "ASL-inspired thumb, index and middle up",
-    "intent": "thank_you"
+    "intent": "thank_you",
+    "canonical_asl": "THANK YOU",
+    "canonical_description": "Start with a flat hand near the lips and move it forward and slightly down toward the person you're thanking. (Lifeprint)"
   }
 }
 

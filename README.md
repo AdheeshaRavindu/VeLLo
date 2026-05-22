@@ -72,3 +72,7 @@ You can train the backend intent model from captured gesture data or a Kaggle ex
    - `CLASSIFIER_MODE=model`
    - `MODEL_FILE=app/data/models/gesture_centroid_model.json`
 
+## ASL verification
+
+- The repository uses "ASL-inspired" gestures. A verification report and canonical-ASL alias mapping have been added: [docs/ASL_verification.md](docs/ASL_verification.md) and [shared/gesture_aliases.json](shared/gesture_aliases.json).
+

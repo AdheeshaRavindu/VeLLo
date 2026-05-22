@@ -55,7 +55,7 @@ export default function DetectPage() {
               Keep your hand visible in camera or switch to demo mode.
             </p>
             <p className="mt-1 text-sm font-medium text-sky-700">
-              ASL-inspired mode: 10 hospital intents
+              Canonical ASL mode: yes, no, pain, water, help, stop
             </p>
           </div>
           <div className="rounded-xl bg-slate-100 p-1">

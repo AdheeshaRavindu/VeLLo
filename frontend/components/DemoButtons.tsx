@@ -9,6 +9,15 @@ const DEMO_INTENTS: Intent[] = [
   "stop",
 ];
 
+const DEMO_INTENT_LABELS: Record<Intent, string> = {
+  yes: "Yes",
+  no: "No",
+  pain: "Pain",
+  water: "Water",
+  help: "Help",
+  stop: "Stop",
+};
+
 interface DemoButtonsProps {
   onSelectIntent: (intent: Intent) => void;
 }
@@ -17,7 +26,7 @@ export default function DemoButtons({ onSelectIntent }: DemoButtonsProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">Demo Mode</p>
-      <p className="mb-3 text-xs text-slate-600">Single-sign stabilization mode</p>
+      <p className="mb-3 text-xs text-slate-600">Six canonical ASL signs only</p>
       <div className="grid grid-cols-2 gap-2">
         {DEMO_INTENTS.map((intent) => (
           <button
@@ -26,7 +35,7 @@ export default function DemoButtons({ onSelectIntent }: DemoButtonsProps) {
             onClick={() => onSelectIntent(intent)}
             className="rounded-lg bg-slate-100 px-3 py-2 text-left text-sm font-medium text-slate-800 transition hover:bg-sky-100"
           >
-            {intent.replaceAll("_", " ")}
+            {DEMO_INTENT_LABELS[intent]}
           </button>
         ))}
       </div>

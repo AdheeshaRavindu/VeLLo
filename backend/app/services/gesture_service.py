@@ -19,6 +19,24 @@ ASL_YES_MIN_AMPLITUDE = 0.045
 _YES_MOTION_HISTORY: deque[tuple[float, float, bool]] = deque()
 
 
+@dataclass
+class _HandState:
+    raised_fingers: int
+    thumb_up: bool
+    index_up: bool
+    middle_up: bool
+    ring_up: bool
+    pinky_up: bool
+    palm_size: float
+    spread_norm: float
+    wrist_x: float
+    wrist_y: float
+
+
+HELP_MIN_VERTICAL_GAP = 0.035
+HELP_MIN_SUPPORT_FINGERS = 3
+
+
 def _distance(point_a: list[float], point_b: list[float]) -> float:
     dx = point_a[0] - point_b[0]
     dy = point_a[1] - point_b[1]
@@ -85,6 +103,25 @@ def _count_raised_fingers(mask: list[bool]) -> int:
     return sum(1 for value in mask if value)
 
 
+def _hand_state(landmarks: list[list[float]], handedness: str | None = None) -> _HandState:
+    raised = _raised_mask(landmarks, handedness)
+    thumb_up, index_up, middle_up, ring_up, pinky_up = raised
+    palm = _palm_size(landmarks)
+    spread_norm = _distance(landmarks[8], landmarks[20]) / palm
+    return _HandState(
+        raised_fingers=_count_raised_fingers(raised),
+        thumb_up=thumb_up,
+        index_up=index_up,
+        middle_up=middle_up,
+        ring_up=ring_up,
+        pinky_up=pinky_up,
+        palm_size=palm,
+        spread_norm=spread_norm,
+        wrist_x=landmarks[0][0],
+        wrist_y=landmarks[0][1],
+    )
+
+
 def _record_yes_motion_sample(wrist_y: float, is_fist: bool) -> None:
     now = monotonic()
     _YES_MOTION_HISTORY.append((now, wrist_y, is_fist))
@@ -140,19 +177,18 @@ def classify_gesture(
     landmarks: list[list[float]],
     handedness: str | None = None,
     detector_confidence: float = 0.7,
+    secondary_landmarks: list[list[float]] | None = None,
+    secondary_handedness: str | None = None,
 ) -> GestureResult:
     if len(landmarks) < 21:
         return GestureResult(intent=None, confidence=0.0)
 
-    raised = _raised_mask(landmarks, handedness)
-    raised_fingers = _count_raised_fingers(raised)
-    thumb_up, index_up, middle_up, ring_up, pinky_up = raised
-    palm = _palm_size(landmarks)
-    spread_norm = _distance(landmarks[8], landmarks[20]) / palm
+    primary = _hand_state(landmarks, handedness)
+    secondary = _hand_state(secondary_landmarks, secondary_handedness) if secondary_landmarks else None
 
     conf_base = max(0.55, min(0.95, detector_confidence))
-    is_fist = raised_fingers == 0 and _is_compact_fist(landmarks, palm)
-    _record_yes_motion_sample(landmarks[0][1], is_fist)
+    is_fist = primary.raised_fingers == 0 and _is_compact_fist(landmarks, primary.palm_size)
+    _record_yes_motion_sample(primary.wrist_y, is_fist)
     yes_motion_debug: dict[str, float | int | bool] | None = None
 
     if is_fist:
@@ -167,7 +203,7 @@ def classify_gesture(
                 debug=yes_debug,
             )
 
-    if raised_fingers == 0 and is_fist:
+    if primary.raised_fingers == 0 and is_fist:
         # Fallback for static ASL "yes" (closed fist) when motion cue is weak.
         return GestureResult(
             intent="yes",
@@ -175,31 +211,40 @@ def classify_gesture(
             debug=yes_motion_debug,
         )
 
-    # Open-hand help gesture.
-    if raised_fingers == 5 and spread_norm > 1.45:
-        return GestureResult(intent="help", confidence=min(0.92, conf_base + 0.15))
+    # Canonical ASL "help" is a loose A/S hand supported from below by the other hand.
+    if primary.raised_fingers <= 1:
+        if secondary is not None:
+            vertical_gap = secondary.wrist_y - primary.wrist_y
+            support_hand_open = secondary.raised_fingers >= HELP_MIN_SUPPORT_FINGERS
+            support_under_primary = vertical_gap >= HELP_MIN_VERTICAL_GAP
+            if support_hand_open and support_under_primary:
+                return GestureResult(intent="help", confidence=min(0.94, conf_base + 0.14))
+        # One-hand fallback for the loose A/S hand itself, but keep it conservative.
+        if primary.raised_fingers == 0 or primary.raised_fingers == 1:
+            return GestureResult(intent="help", confidence=min(0.78, conf_base + 0.03))
 
-    # Four fingers up, thumb tucked.
-    if raised_fingers == 4 and not thumb_up:
-        return GestureResult(intent="stop", confidence=min(0.92, conf_base + 0.14))
+    # Canonical ASL "stop" uses an open palm chopped into/against the support hand.
+    if primary.raised_fingers >= 4 and secondary is not None:
+        if secondary.raised_fingers >= 4 and abs(primary.wrist_x - secondary.wrist_x) < 0.18:
+            return GestureResult(intent="stop", confidence=min(0.88, conf_base + 0.08))
+    if primary.raised_fingers == 4 and not primary.thumb_up:
+        return GestureResult(intent="stop", confidence=min(0.8, conf_base + 0.04))
 
-    # Thumb-only gesture.
-    if thumb_up and not index_up and not middle_up and not ring_up and not pinky_up:
-        return GestureResult(intent="water", confidence=min(0.9, conf_base + 0.12))
+    # Canonical ASL "water" is a W hand tapped at the mouth.
+    if primary.index_up and primary.middle_up and primary.ring_up and not primary.thumb_up and not primary.pinky_up:
+        return GestureResult(intent="water", confidence=min(0.92, conf_base + 0.14))
 
-    # Thumb+index gesture.
-    if thumb_up and index_up and not middle_up and not ring_up and not pinky_up:
-        return GestureResult(intent="pain", confidence=min(0.92, conf_base + 0.11))
+    # Canonical ASL "pain" is two index fingers brought together/twisted.
+    if secondary is not None:
+        primary_pain = primary.index_up and not primary.middle_up and not primary.ring_up and not primary.pinky_up
+        secondary_pain = secondary.index_up and not secondary.middle_up and not secondary.ring_up and not secondary.pinky_up
+        index_gap = _distance(landmarks[8], secondary_landmarks[8]) / max(primary.palm_size, secondary.palm_size)
+        if primary_pain and secondary_pain and index_gap < 1.15:
+            return GestureResult(intent="pain", confidence=min(0.93, conf_base + 0.12))
 
-    # "No" variants: keep strict to avoid overlap with pain/water.
-    if index_up and middle_up and not ring_up and not pinky_up and not thumb_up:
-        return GestureResult(intent="no", confidence=min(0.87, conf_base + 0.1))
-
-    if index_up and not middle_up and not ring_up and not pinky_up and not thumb_up:
-        return GestureResult(intent="no", confidence=min(0.9, conf_base + 0.12))
-
-    if index_up and not middle_up and not ring_up and pinky_up and not thumb_up:
-        return GestureResult(intent="no", confidence=min(0.92, conf_base + 0.12))
+    # Canonical ASL "no" is a small side-to-side movement with the index and middle fingers.
+    if primary.index_up and primary.middle_up and not primary.ring_up and not primary.pinky_up and not primary.thumb_up:
+        return GestureResult(intent="no", confidence=min(0.9, conf_base + 0.1))
 
     return GestureResult(intent=None, confidence=0.0)
 

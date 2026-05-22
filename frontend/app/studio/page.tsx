@@ -14,6 +14,10 @@ import { detectSign, synthesizeVoice } from "@/services/api";
 import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
 import type { Intent } from "@/types";
 
+const STUDIO_STABILITY_FRAMES = 3;
+const STUDIO_INTENT_HOLD_MS = 1400;
+const STUDIO_REPEAT_UPDATE_MS = 2500;
+
 export default function StudioPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -21,6 +25,11 @@ export default function StudioPage() {
   const lastSpokenTextRef = useRef<string>("");
   const lastSpokenAtRef = useRef<number>(0);
   const inFlightRef = useRef(false);
+  const stableIntentRef = useRef<Intent | null>(null);
+  const stableCountRef = useRef(0);
+  const lastAcceptedAtRef = useRef(0);
+  const lastDisplayedPhraseRef = useRef("");
+  const lastDisplayUpdateAtRef = useRef(0);
 
   const [cameraStatus, setCameraStatus] = useState<"loading" | "ready" | "denied">(
     "loading",
@@ -139,10 +148,11 @@ export default function StudioPage() {
 
   useEffect(() => {
     let stream: MediaStream | null = null;
+    let cancelled = false;
 
     const startCamera = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const nextStream = await navigator.mediaDevices.getUserMedia({
           video: {
             width: { ideal: 1920 },
             height: { ideal: 1080 },
@@ -151,6 +161,12 @@ export default function StudioPage() {
           audio: false,
         });
 
+        if (cancelled) {
+          nextStream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        stream = nextStream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
@@ -165,6 +181,7 @@ export default function StudioPage() {
     startCamera();
 
     return () => {
+      cancelled = true;
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
@@ -193,13 +210,41 @@ export default function StudioPage() {
       try {
         const result = await detectSign({ image_base64: image });
         if (cancelled) return;
+        const now = Date.now();
         setHandDetected(result.hand_detected);
-        setConfidence(result.confidence ?? 0);
+
         if (result.intent && result.phrase) {
-          updateRecognition(result.intent, result.phrase, result.confidence);
-          void speakPhrase(result.phrase);
+          if (result.intent === stableIntentRef.current) {
+            stableCountRef.current += 1;
+          } else {
+            stableIntentRef.current = result.intent;
+            stableCountRef.current = 1;
+          }
+
+          const isStable = stableCountRef.current >= STUDIO_STABILITY_FRAMES;
+          const isNewPhrase = result.phrase !== lastDisplayedPhraseRef.current;
+          const canRefreshPhrase = now - lastDisplayUpdateAtRef.current >= STUDIO_REPEAT_UPDATE_MS;
+
+          if (isStable) {
+            lastAcceptedAtRef.current = now;
+            setConfidence(result.confidence ?? 0);
+
+            if (isNewPhrase || canRefreshPhrase) {
+              lastDisplayedPhraseRef.current = result.phrase;
+              lastDisplayUpdateAtRef.current = now;
+              updateRecognition(result.intent, result.phrase, result.confidence);
+              void speakPhrase(result.phrase);
+            }
+          }
         } else {
+          stableIntentRef.current = null;
+          stableCountRef.current = 0;
+          setRecognizedIntent(null);
+          setRecognizedGloss("[WAITING FOR HAND]");
+          setRecognizedTranslation("Show a hand gesture to begin");
+          setConfidence(result.confidence ?? 0);
           setIsSpeaking(false);
+
           if (result.error) {
             setDetectionError(result.error);
           }

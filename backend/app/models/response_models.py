@@ -6,6 +6,7 @@ class DetectionResponse(BaseModel):
     confidence: float
     intent: str | None
     phrase: str | None
+    canonical_asl: str | None = None
     source: str
     handedness: str | None = None
     handedness_score: float | None = None

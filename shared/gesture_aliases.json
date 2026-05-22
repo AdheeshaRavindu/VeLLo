@@ -1,0 +1,72 @@
+{
+  "asl_open_palm": {
+    "repo_intent": "help",
+    "canonical_asl": "HELP",
+    "canonical_label": "help",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/h/help.htm"
+  },
+  "asl_thumb_up": {
+    "repo_intent": "water",
+    "canonical_asl": "WATER",
+    "canonical_label": "water",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/w/water.htm"
+  },
+  "asl_index_up": {
+    "repo_intent": "doctor",
+    "canonical_asl": "DOCTOR",
+    "canonical_label": "doctor",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/d/doctor.htm"
+  },
+  "asl_index_middle_up": {
+    "repo_intent": "medicine",
+    "canonical_asl": "MEDICINE",
+    "canonical_label": "medicine",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/m/medicine.htm"
+  },
+  "asl_open_palm_spread": {
+    "repo_intent": "emergency",
+    "canonical_asl": "EMERGENCY",
+    "canonical_label": "emergency",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/e/emergency.htm"
+  },
+  "asl_fist": {
+    "repo_intent": "pain",
+    "canonical_asl": "HURT/PAIN",
+    "canonical_label": "pain",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/p/pain.htm"
+  },
+  "asl_thumb_index_pinch": {
+    "repo_intent": "yes",
+    "canonical_asl": "YES",
+    "canonical_label": "yes",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/y/yes.htm"
+  },
+  "asl_index_pinky_up": {
+    "repo_intent": "no",
+    "canonical_asl": "NO",
+    "canonical_label": "no",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/n/no.htm"
+  },
+  "asl_stop_palm_no_thumb": {
+    "repo_intent": "stop",
+    "canonical_asl": "STOP",
+    "canonical_label": "stop",
+    "verdict": "partial",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/s/stop.htm"
+  },
+  "asl_thumb_index_middle_up": {
+    "repo_intent": "thank_you",
+    "canonical_asl": "THANK YOU",
+    "canonical_label": "thank_you",
+    "verdict": "incorrect",
+    "source": "https://www.lifeprint.com/asl101/pages-signs/t/thankyou.htm"
+  }
+}
