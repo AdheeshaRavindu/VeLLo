@@ -1,14 +1,9 @@
 import os
 import threading
-import time
+import subprocess
 from pathlib import Path
-from typing import Optional
 
 from app.utils.config import get_env
-
-# Reuse existing scripts
-from ...scripts.generate_synthetic_help_data import generate as generate_synthetic
-from ...scripts.train_help_detector import main as train_main
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,21 +41,24 @@ def maybe_train_help_model(background: bool = True, min_rows: int = 200) -> None
             except Exception:
                 pass
 
-        # Ensure we have data; generate synthetic if needed
+        # Ensure we have data; generate synthetic if needed (call scripts via subprocess)
+        script_dir = Path(__file__).resolve().parents[2] / 'scripts'
+        gen_script = script_dir / 'generate_synthetic_help_data.py'
+        train_script = script_dir / 'train_help_detector.py'
+
         if not _has_enough_data(min_rows=min_rows):
-            # generate a modest synthetic dataset
             try:
                 print('Auto-train: generating synthetic data...')
-                generate_synthetic(n_per_class=250)
-            except Exception as e:
+                subprocess.run(['python', str(gen_script)], check=True)
+            except subprocess.CalledProcessError as e:
                 print('Auto-train: synthetic generation failed:', e)
 
-        # Run training
+        # Run training (subprocess so module imports are isolated)
         try:
             print('Auto-train: starting training...')
-            train_main()
+            subprocess.run(['python', str(train_script)], check=True)
             print('Auto-train: training complete')
-        except Exception as e:
+        except subprocess.CalledProcessError as e:
             print('Auto-train: training failed:', e)
 
     if background:
