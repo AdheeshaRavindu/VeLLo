@@ -8,4 +8,3 @@ This folder contains supporting documentation for the Sign-to-Voice Assistant pr
 - **Demo Script**: [demo-script.md](demo-script.md) — suggested demo steps and testing checklist.
 - **Help Dataset**: [help_dataset.md](help_dataset.md) — guidance on the dataset used for help phrases and collection notes.
 
-If you add new docs, update this index to help contributors find them quickly.
