@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AudioPlayer from "@/components/AudioPlayer";
 import CameraFeed from "@/components/CameraFeed";
+import DebugPanel from "@/components/DebugPanel";
 import DetectionStatus from "@/components/DetectionStatus";
 import DemoButtons from "@/components/DemoButtons";
 import LoadingState from "@/components/LoadingState";
@@ -109,6 +110,7 @@ export default function DetectPage() {
             suppressionReason={outputSuppressionReason}
           />
           <AudioPlayer phrase={outputPhrase} />
+          {mode === "live" ? <DebugPanel videoRef={videoRef} /> : null}
           {mode === "demo" ? <DemoButtons onSelectIntent={onDemoSelect} /> : null}
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
             Mode: <strong>{mode}</strong> | Permission: {permission}

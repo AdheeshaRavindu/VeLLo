@@ -33,9 +33,9 @@ class _HandState:
     wrist_y: float
 
 
-HELP_MIN_VERTICAL_GAP = 0.025
-HELP_MIN_SUPPORT_FINGERS = 2
-HELP_MAX_THUMB_PALM_PROXIMITY = 0.35
+HELP_MIN_VERTICAL_GAP = 0.01
+HELP_MIN_SUPPORT_FINGERS = 1
+HELP_MAX_THUMB_PALM_PROXIMITY = 0.55
 
 
 def _distance(point_a: list[float], point_b: list[float]) -> float:
@@ -217,11 +217,19 @@ def classify_gesture(
         # Prefer the two-hand canonical layout: thumb-up resting on open palm.
         if secondary is not None:
             vertical_gap = secondary.wrist_y - primary.wrist_y
-            support_hand_open = secondary.raised_fingers >= HELP_MIN_SUPPORT_FINGERS or secondary.spread_norm > 0.9
+            support_hand_open = (
+                secondary.raised_fingers >= HELP_MIN_SUPPORT_FINGERS or secondary.spread_norm > 0.75
+            )
             support_under_primary = vertical_gap >= HELP_MIN_VERTICAL_GAP
-            # compute palm centre for secondary (approx wrist + palm base)
-            sec_palm_center = ((secondary.wrist_x + (landmarks[9][0] if len(landmarks) > 9 else secondary.wrist_x)) / 2,
-                               (secondary.wrist_y + (landmarks[9][1] if len(landmarks) > 9 else secondary.wrist_y)) / 2)
+            # compute palm centre for secondary (use secondary landmarks when available)
+            try:
+                if secondary_landmarks is not None and len(secondary_landmarks) > 9:
+                    sec_base = secondary_landmarks[9]
+                else:
+                    sec_base = (secondary.wrist_x, secondary.wrist_y)
+                sec_palm_center = ((secondary.wrist_x + sec_base[0]) / 2, (secondary.wrist_y + sec_base[1]) / 2)
+            except Exception:
+                sec_palm_center = (secondary.wrist_x, secondary.wrist_y)
             # primary thumb tip location
             try:
                 thumb_tip = landmarks[4]
@@ -231,11 +239,12 @@ def classify_gesture(
 
             if support_hand_open and support_under_primary and thumb_palm_prox <= HELP_MAX_THUMB_PALM_PROXIMITY:
                 debug = {"vertical_gap": round(vertical_gap, 4), "thumb_palm_prox": round(thumb_palm_prox, 4)}
-                return GestureResult(intent="help", confidence=min(0.96, conf_base + 0.16), debug=debug)
+                return GestureResult(intent="help", confidence=min(0.98, conf_base + 0.20), debug=debug)
 
         # One-hand fallback for the loose A/S hand itself, but keep it conservative.
         if primary.raised_fingers == 0 or primary.raised_fingers == 1:
-            return GestureResult(intent="help", confidence=min(0.78, conf_base + 0.03))
+            # one-hand fallback: increase confidence a bit to help noisy single-hand captures
+            return GestureResult(intent="help", confidence=min(0.86, conf_base + 0.08))
 
     # Canonical ASL "stop" uses an open palm chopped into/against the support hand.
     if primary.raised_fingers >= 4 and secondary is not None:
@@ -252,11 +261,13 @@ def classify_gesture(
     if secondary is not None:
         primary_pain = primary.index_up and not primary.middle_up and not primary.ring_up and not primary.pinky_up
         secondary_pain = secondary.index_up and not secondary.middle_up and not secondary.ring_up and not secondary.pinky_up
-        index_gap = _distance(landmarks[8], secondary_landmarks[8]) / max(primary.palm_size, secondary.palm_size)
+        # use average palm size for normalization for more stable ratio across hand sizes
+        denom = (primary.palm_size + secondary.palm_size) / 2.0
+        index_gap = _distance(landmarks[8], secondary_landmarks[8]) / max(denom, 1e-4)
         # allow a larger gap tolerance to account for varied camera angles
-        if primary_pain and secondary_pain and index_gap < 1.3:
+        if primary_pain and secondary_pain and index_gap < 1.6:
             debug = {"index_gap": round(index_gap, 4)}
-            return GestureResult(intent="pain", confidence=min(0.94, conf_base + 0.12), debug=debug)
+            return GestureResult(intent="pain", confidence=min(0.96, conf_base + 0.14), debug=debug)
 
     # Canonical ASL "no" is a small side-to-side movement with the index and middle fingers.
     if primary.index_up and primary.middle_up and not primary.ring_up and not primary.pinky_up and not primary.thumb_up:

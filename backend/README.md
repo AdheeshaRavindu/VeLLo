@@ -54,3 +54,6 @@ Use the built-in trainer to create a model file consumed by `CLASSIFIER_MODE=mod
    - `CLASSIFIER_MODE=model`
    - `MODEL_FILE=app/data/models/gesture_centroid_model.json`
 
+  ## Documentation
+  See the repository docs index: [docs/README.md](../docs/README.md).
+
