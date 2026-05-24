@@ -31,6 +31,10 @@ export function detectSign(body: DetectRequest): Promise<DetectionResponse> {
   return postJson<DetectionResponse, DetectRequest>("/api/detect", body);
 }
 
+export function detectDebug(body: DetectRequest): Promise<DetectionResponse> {
+  return postJson<DetectionResponse, DetectRequest>("/api/debug", body);
+}
+
 export function synthesizeVoice(body: VoiceRequest): Promise<VoiceResponse> {
   return postJson<VoiceResponse, VoiceRequest>("/api/voice", body);
 }

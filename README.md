@@ -1,5 +1,14 @@
 # Hospital Sign-to-Voice Assistant
 
+![Our team — winners](binara.events-560.jpg)
+
+## Leaderboard
+Binara Events 560 — Winners
+
+![Leaderboard screenshot]("Screenshot 2026-05-24 141504.png")
+
+*Screenshot: Binara Events — OutR team winners*
+
 Hackathon MVP for hospital accessibility: predefined sign gestures to spoken voice.
 
 ## Stack
@@ -74,5 +83,12 @@ You can train the backend intent model from captured gesture data or a Kaggle ex
 
 ## ASL verification
 
-- The repository uses "ASL-inspired" gestures. A verification report and canonical-ASL alias mapping have been added: [docs/ASL_verification.md](docs/ASL_verification.md) and [shared/gesture_aliases.json](shared/gesture_aliases.json).
+-- The repository uses "ASL-inspired" gestures. A verification report and canonical-ASL alias mapping have been added: [docs/ASL_verification.md](docs/ASL_verification.md) and [shared/gesture_aliases.json](shared/gesture_aliases.json).
+
+## Documentation index
+Developer and design docs live in the `docs` folder. Start at [docs/README.md](docs/README.md) for an index of documents.
+
+## Contributing
+- Use the `docker compose` flow for reproducible development environments.
+- Open issues for bugs/feature requests and add concise repro steps.
 
