@@ -2,6 +2,13 @@
 
 ![Our team — winners](binara.events-560.jpg)
 
+## Leaderboard
+Binara Events 560 — Winners
+
+![Leaderboard screenshot]("Screenshot 2026-05-24 141504.png")
+
+*Screenshot: Binara Events — OutR team winners*
+
 Hackathon MVP for hospital accessibility: predefined sign gestures to spoken voice.
 
 ## Stack
