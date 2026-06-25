@@ -213,7 +213,7 @@ export default function StudioPage() {
         const now = Date.now();
         setHandDetected(result.hand_detected);
 
-        if (result.intent && result.phrase) {
+        if (result.intent && result.intent !== "unknown" && result.phrase) {
           if (result.intent === stableIntentRef.current) {
             stableCountRef.current += 1;
           } else {
