@@ -240,8 +240,13 @@ export default function StudioPage() {
           stableIntentRef.current = null;
           stableCountRef.current = 0;
           setRecognizedIntent(null);
-          setRecognizedGloss("[WAITING FOR HAND]");
-          setRecognizedTranslation("Show a hand gesture to begin");
+          if (result.hand_detected) {
+            setRecognizedGloss("[UNRECOGNIZED]");
+            setRecognizedTranslation("Hand detected, gesture not recognized");
+          } else {
+            setRecognizedGloss("[WAITING FOR HAND]");
+            setRecognizedTranslation("Show a hand gesture to begin");
+          }
           setConfidence(result.confidence ?? 0);
           setIsSpeaking(false);
 
