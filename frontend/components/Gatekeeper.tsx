@@ -12,6 +12,8 @@ type GatekeeperProps = {
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const SUPPORTED_SIGN_LABELS = ["Help", "Water", "Pain", "Yes", "No", "Stop"];
+
 export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   const [permissionState, setPermissionState] = useState<PermissionState>("idle");
   const [heroVisible, setHeroVisible] = useState(false);
@@ -58,7 +60,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
   }
 
   return (
-    <main className="relative flex min-h-[100dvh] w-full justify-center overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-4 py-2 text-emerald-950 sm:px-6 lg:py-2">
+    <main className="relative flex min-h-[100dvh] w-full justify-center overflow-x-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-green-100 px-3 py-2 text-emerald-950 sm:px-6 lg:py-2">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_38%,rgba(16,185,129,0.18),transparent_45%),radial-gradient(circle_at_72%_42%,rgba(132,204,22,0.16),transparent_38%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(236,253,245,0.85),transparent_60%)]" />
 
@@ -69,10 +71,10 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
         </span>
 
         <h1
-          className={`mt-3  w-max text-3xl font-bold tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-2 sm:mb-1 sm:text-4xl lg:text-5xl lg:leading-tight ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
+          className={`mt-3 w-full max-w-[350px] text-balance text-center text-[2rem] font-bold leading-[1.05] tracking-tight text-emerald-950 drop-shadow-[0_2px_14px_rgba(6,78,59,0.2)] sm:mt-2 sm:mb-1 sm:max-w-2xl sm:text-4xl lg:text-5xl lg:leading-tight ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out`}
         >
-          LET&apos;S GIVE YOUR{" "}
-          <span className="bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-clip-text text-transparent">
+          <span className="block sm:inline">LET&apos;S GIVE YOUR</span>{" "}
+          <span className="block bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500 bg-clip-text text-transparent sm:inline">
             HANDS A VOICE
           </span>
         </h1>
@@ -87,8 +89,22 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
           live on your screen.
         </p>
 
-        <div className="mx-auto mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-3 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] sm:p-2   lg:mt-5 lg:mb-5">
-          <div className="relative h-[240px] overflow-hidden rounded-[24px] border border-emerald-300/50 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[320px] sm:rounded-[28px] lg:h-[330px]">
+        <div
+          className={`mt-3 flex max-w-[360px] flex-wrap justify-center gap-1.5 sm:max-w-xl sm:gap-2 ${heroVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"} transform-gpu transition-all duration-700 ease-out [transition-delay:320ms]`}
+          aria-label="Supported signs"
+        >
+          {SUPPORTED_SIGN_LABELS.map((label) => (
+            <span
+              key={label}
+              className="rounded-full border border-emerald-200 bg-white/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.1)] backdrop-blur sm:px-3 sm:text-[11px]"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+
+        <div className="mx-auto mt-3 w-full rounded-[28px] border border-emerald-200/70 bg-white/55 p-2 shadow-[0_22px_52px_rgba(6,95,70,0.22),0_0_56px_rgba(16,185,129,0.16)] backdrop-blur-2xl sm:mt-4 sm:rounded-[32px] lg:mt-5 lg:mb-5">
+          <div className="relative h-[218px] overflow-hidden rounded-[24px] border border-emerald-300/50 bg-gradient-to-br from-emerald-100 via-lime-100 to-green-100 sm:h-[320px] sm:rounded-[28px] lg:h-[330px]">
             <img
               src="/models/woman-sign.png"
               alt="Woman demonstrating a sign language hand gesture"
@@ -100,7 +116,7 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
 
             
 
-            <div className="absolute -translate-x-20 left-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300/50 bg-white/68 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.14)] backdrop-blur-xl sm:left-[20%] sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
+            <div className="absolute left-3 top-3 rounded-lg border border-emerald-300/50 bg-white/68 px-2 py-1.5 text-left text-[10px] text-emerald-900 shadow-[0_0_12px_rgba(16,185,129,0.14)] backdrop-blur-xl sm:left-[20%] sm:top-1/2 sm:-translate-x-20 sm:-translate-y-1/2 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
               <span className="flex items-center gap-1 sm:gap-1.5">
                 <AudioLines
                   className={`h-3 w-3 text-emerald-600 sm:h-3.5 sm:w-3.5 ${permissionState === "requesting" ? "animate-pulse" : ""}`}
@@ -110,12 +126,12 @@ export default function Gatekeeper({ onComplete }: GatekeeperProps) {
               </span>
             </div>
 
-            <div className="absolute right-[18%] top-1/2 -translate-y-1/2 rounded-lg border border-lime-300/60 bg-white/68 px-2.5 py-1.5 text-center shadow-[0_0_14px_rgba(132,204,22,0.14)] backdrop-blur-xl sm:right-[6%] sm:rounded-xl sm:px-3.5 sm:py-2">
+            <div className="absolute right-3 top-3 rounded-lg border border-lime-300/60 bg-white/68 px-2.5 py-1.5 text-center shadow-[0_0_14px_rgba(132,204,22,0.14)] backdrop-blur-xl sm:right-[6%] sm:top-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:px-3.5 sm:py-2">
               <p className="text-[8px] tracking-[0.14em] text-emerald-700 sm:text-[9px] sm:tracking-[0.16em]">DETECTED SIGN</p>
-              <p className="bg-gradient-to-b from-emerald-600 to-lime-600 bg-clip-text text-xl font-bold leading-none text-transparent animate-pulse sm:text-2xl">
-                L
+              <p className="bg-gradient-to-b from-emerald-600 to-lime-600 bg-clip-text text-lg font-bold leading-none text-transparent animate-pulse sm:text-2xl">
+                HELP
               </p>
-              <p className="mt-0.5 text-[8px] tracking-[0.14em] text-emerald-600/80 sm:text-[9px] sm:tracking-[0.16em]">LETTER</p>
+              <p className="mt-0.5 text-[8px] tracking-[0.14em] text-emerald-600/80 sm:text-[9px] sm:tracking-[0.16em]">PHRASE</p>
             </div>
 
             <div className="pointer-events-none absolute inset-[13%_30%_10%_30%] rounded-xl border border-emerald-400/45 shadow-[0_0_22px_rgba(16,185,129,0.26)] sm:inset-[12%_29.5%_10%_29.5%] sm:rounded-2xl" />

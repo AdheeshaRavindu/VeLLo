@@ -9,6 +9,7 @@ import DemoButtons from "@/components/DemoButtons";
 import LoadingState from "@/components/LoadingState";
 import Navbar from "@/components/Navbar";
 import PhraseCard from "@/components/PhraseCard";
+import SupportedSignsGuide from "@/components/SupportedSignsGuide";
 import { useCamera } from "@/hooks/useCamera";
 import { useDetection } from "@/hooks/useDetection";
 import type { Intent } from "@/types";
@@ -110,6 +111,7 @@ export default function DetectPage() {
             suppressionReason={outputSuppressionReason}
           />
           <AudioPlayer phrase={outputPhrase} />
+          <SupportedSignsGuide />
           {mode === "live" ? <DebugPanel videoRef={videoRef} /> : null}
           {mode === "demo" ? <DemoButtons onSelectIntent={onDemoSelect} /> : null}
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">

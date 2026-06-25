@@ -10,6 +10,7 @@ import {
   Video,
   Volume2,
 } from "lucide-react";
+import SupportedSignsGuide from "@/components/SupportedSignsGuide";
 import { detectSign, synthesizeVoice } from "@/services/api";
 import { base64ToObjectUrl, speakFallback } from "@/services/elevenlabs";
 import type { Intent } from "@/types";
@@ -524,7 +525,7 @@ export default function StudioPage() {
                     <Languages className="h-3.5 w-3.5 text-emerald-300" />
                     Recognized Phrase
                   </div>
-                  <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-emerald-400/25 bg-emerald-900/50 px-3 py-3 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
+                  <div className="flex min-h-[116px] flex-col items-center justify-center rounded-xl border border-emerald-400/25 bg-emerald-900/50 px-3 py-3 text-center shadow-[inset_0_0_0_1px_rgba(16,185,129,0.08)]">
                     <p
                       className={`max-w-[15ch] text-balance text-2xl font-black uppercase leading-tight tracking-[0.08em] text-emerald-50 transition-all duration-300 sm:text-[1.7rem] ${
                         subtitleVisible
@@ -545,6 +546,8 @@ export default function StudioPage() {
                     </p>
                   </div>
                 </article>
+
+                <SupportedSignsGuide variant="dark" compact />
 
                 <article className="min-h-0 flex flex-1 flex-col rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
                   <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
@@ -604,7 +607,7 @@ export default function StudioPage() {
         className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-[#0b1a31]/78 px-4 py-2 text-xs tracking-[0.1em] text-emerald-100 shadow-[0_0_18px_rgba(16,185,129,0.16),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl lg:hidden"
       >
         <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-        COMMAND CENTER
+        SIGN GUIDE
       </button>
 
       <div
@@ -664,6 +667,8 @@ export default function StudioPage() {
                 ))}
               </div>
             </article>
+
+            <SupportedSignsGuide variant="dark" />
 
             <article className="rounded-2xl border border-emerald-400/25 bg-[#0b1a31]/68 p-2.5 shadow-[0_0_16px_rgba(16,185,129,0.14),0_0_14px_rgba(56,189,248,0.1)] backdrop-blur-xl">
               <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100">
