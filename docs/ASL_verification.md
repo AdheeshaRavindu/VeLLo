@@ -1,23 +1,28 @@
 # ASL Verification Report
 
-This file documents verification of repository gesture labels against standard ASL references (Lifeprint / ASL University).
+This file documents verification of repository gesture labels against standard ASL references (Lifeprint / ASL University). The app currently exposes six hospital-focused signs: `yes`, `no`, `pain`, `water`, `help`, and `stop`.
 
 Source references:
 - Lifeprint (ASL University) sign pages: https://www.lifeprint.com/asl101/pages-signs/
 
-Findings:
+## Active Sign Findings
 
-- help — repo gesture: `asl_open_palm` — Verdict: Incorrect. ASL "help" uses an `A` (or `S`) hand lifted by the other hand. Source: https://www.lifeprint.com/asl101/pages-signs/h/help.htm
-- water — repo gesture: `asl_thumb_up` — Verdict: Incorrect. ASL "water" uses a `W` hand tapped at the chin. Source: https://www.lifeprint.com/asl101/pages-signs/w/water.htm
-- doctor — repo gesture: `asl_index_up` — Verdict: Incorrect. ASL "doctor" taps a bent/D hand at the wrist (pulse). Source: https://www.lifeprint.com/asl101/pages-signs/d/doctor.htm
-- medicine — repo gesture: `asl_index_middle_up` — Verdict: Incorrect. ASL "medicine" touches middle finger to palm and pivots. Source: https://www.lifeprint.com/asl101/pages-signs/m/medicine.htm
-- emergency — repo gesture: `asl_open_palm_spread` — Verdict: Incorrect. ASL "emergency" commonly uses a shaking `E` handshape. Source: https://www.lifeprint.com/asl101/pages-signs/e/emergency.htm
-- pain — repo gesture: `asl_fist` — Verdict: Incorrect. ASL "pain/hurt" uses extended index fingers jabbing/twisting. Source: https://www.lifeprint.com/asl101/pages-signs/p/pain.htm
-- yes — repo gesture: `asl_thumb_index_pinch` — Verdict: Incorrect. ASL "yes" is an `S` (fist) nodding motion. Source: https://www.lifeprint.com/asl101/pages-signs/y/yes.htm
-- no — repo gesture: `asl_index_pinky_up` — Verdict: Incorrect. ASL "no" typically uses index+middle-to-thumb or a small side-to-side motion. Source: https://www.lifeprint.com/asl101/pages-signs/n/no.htm
-- stop — repo gesture: `asl_stop_palm_no_thumb` — Verdict: Partial match. ASL "stop" is one palm up and the other chops down; repo variant may be acceptable. Source: https://www.lifeprint.com/asl101/pages-signs/s/stop.htm
-- thank_you — repo gesture: `asl_thumb_index_middle_up` — Verdict: Incorrect. ASL "thank you" is a flat hand from the chin outward. Source: https://www.lifeprint.com/asl101/pages-signs/t/thankyou.htm
+- `help`: Canonical ASL uses an `A` or `S` hand lifted by the other hand. The detector now prefers a thumb-up or loose fist supported by an open palm. Source: https://www.lifeprint.com/asl101/pages-signs/h/help.htm
+- `water`: Canonical ASL uses a `W` hand tapped at the chin. The detector recognizes the W-like handshape; it does not require chin contact. Source: https://www.lifeprint.com/asl101/pages-signs/w/water.htm
+- `pain`: Canonical ASL uses extended index fingers jabbing or twisting near each other. The detector recognizes two visible index fingers close together. Source: https://www.lifeprint.com/asl101/pages-signs/p/pain.htm
+- `yes`: Canonical ASL is an `S` hand/fist nodding motion. The detector recognizes a closed fist and uses short up/down motion when available. Source: https://www.lifeprint.com/asl101/pages-signs/y/yes.htm
+- `no`: Canonical ASL uses index and middle fingers closing to the thumb or a small side-to-side movement. The detector recognizes the index+middle handshape. Source: https://www.lifeprint.com/asl101/pages-signs/n/no.htm
+- `stop`: Canonical ASL is one palm chopping down into the other palm. The detector prefers a two-hand stop/chop pose and includes a one-hand fallback. Source: https://www.lifeprint.com/asl101/pages-signs/s/stop.htm
+
+## Legacy Alias Records
+
+The shared alias file also contains older labels that are not part of the active supported intent set:
+
+- `doctor`: ASL "doctor" taps a bent/D hand at the wrist. Source: https://www.lifeprint.com/asl101/pages-signs/d/doctor.htm
+- `medicine`: ASL "medicine" touches middle finger to palm and pivots. Source: https://www.lifeprint.com/asl101/pages-signs/m/medicine.htm
+- `emergency`: ASL "emergency" commonly uses a shaking `E` handshape. Source: https://www.lifeprint.com/asl101/pages-signs/e/emergency.htm
+- `thank_you`: ASL "thank you" is a flat hand from the chin outward. Source: https://www.lifeprint.com/asl101/pages-signs/t/thankyou.htm
 
 Notes:
-- The repository labels are "ASL-inspired" but differ from standard ASL in most cases. I recommend keeping the existing model gesture names for the classifier (to avoid breaking code) and adding canonical ASL aliases (see `shared/gesture_aliases.json`).
+- The detector is optimized for a constrained hospital communication workflow. `shared/gesture_aliases.json` keeps canonical ASL display labels separate from internal classifier intent names.
 
