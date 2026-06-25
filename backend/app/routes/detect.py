@@ -10,8 +10,8 @@ from app.utils.constants import INTENT_THRESHOLDS, SUPPORTED_INTENTS
 
 router = APIRouter(prefix="/api", tags=["detect"])
 INTENT_ALIASES: dict[str, str] = {
-    "help": "i_need_help",
-    "emergency": "i_need_help",
+    "i_need_help": "help",
+    "emergency": "help",
 }
 
 # Load gesture aliases once and build intent -> canonical ASL mapping.
@@ -19,7 +19,15 @@ from pathlib import Path
 import json
 
 _ALIASES_PATH = Path(__file__).resolve().parents[3] / "shared" / "gesture_aliases.json"
-_INTENT_TO_CANONICAL: dict[str, str] = {}
+DEFAULT_INTENT_TO_CANONICAL: dict[str, str] = {
+    "help": "HELP",
+    "water": "WATER",
+    "pain": "HURT/PAIN",
+    "yes": "YES",
+    "no": "NO",
+    "stop": "STOP",
+}
+_INTENT_TO_CANONICAL: dict[str, str] = DEFAULT_INTENT_TO_CANONICAL.copy()
 try:
     with open(_ALIASES_PATH, "r", encoding="utf-8") as f:
         _aliases = json.load(f)
@@ -29,8 +37,8 @@ try:
             if repo_intent and canonical:
                 _INTENT_TO_CANONICAL[repo_intent] = canonical
 except Exception:
-    # If loading fails, leave mapping empty; API will return null for canonical_asl.
-    _INTENT_TO_CANONICAL = {}
+    # Railway may build only backend/, without repo-level shared files.
+    _INTENT_TO_CANONICAL = DEFAULT_INTENT_TO_CANONICAL.copy()
 
 
 def _normalize_intent(intent: str | None) -> str | None:

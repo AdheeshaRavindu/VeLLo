@@ -5,7 +5,11 @@ from pathlib import Path
 DEFAULT_PHRASE_MAP: dict[str, str] = {
     "yes": "Yes.",
     "no": "No.",
-    "i_need_help": "I need help.",
+    "pain": "I am in pain.",
+    "water": "I need water.",
+    "help": "Please help me.",
+    "i_need_help": "Please help me.",
+    "stop": "Please stop.",
 }
 
 
